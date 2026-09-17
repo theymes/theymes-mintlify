@@ -1,0 +1,525 @@
+---
+title: "API Reference"
+description: "All the Theymes SDK methods are static and can be called using the TheymesSdk class. The TheymesSdk class is located in the Theymes namespace."
+---
+
+All the Theymes SDK methods are static and can be called using the `TheymesSdk` class. The `TheymesSdk` class is located in the `Theymes` namespace.
+
+<Info>
+**Important**
+
+Before you can use any other functions of the SDK, you must initialize it by calling the `TheymesSdk.Initialize()` method. See [Installing the SDK](/developers/sdk/unity/installing) for more information.
+</Info>
+
+## Initialization
+
+### Initialize
+
+```csharp
+public static void Initialize(string token, string domain)
+public static void Initialize(string token, string domain, InitializeOptions options)
+```
+
+The `TheymesSdk.Initialize()` method initializes the SDK with the given token and domain.
+
+The third parameter `options` is optional. `options.web` configures WebGL-specific behavior and is ignored on iOS and Android. `options.android` configures Android-specific behavior and is ignored on iOS and WebGL.
+
+**InitializeOptions**
+
+| Property    | Type                       | Optional | Description                                         |
+| ----------- | -------------------------- | -------- | --------------------------------------------------- |
+| `apiDomain` | `string`                   | Yes      | Override the default API domain used by the SDK.    |
+| `web`       | `InitializeWebOptions`     | Yes      | WebGL-specific options. Ignored on iOS and Android. |
+| `android`   | `InitializeAndroidOptions` | Yes      | Android-specific options. Ignored on iOS and WebGL. |
+
+**InitializeWebOptions**
+
+| Property         | Type     | Optional | Description                                                                                                                      |
+| ---------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `canvasSelector` | `string` | Yes      | CSS selector for the canvas element (e.g. `#gameCanvas`). Use when your game has multiple canvases.                              |
+| `nonce`          | `string` | Yes      | Nonce for Content Security Policy (CSP) compatibility. Pass the same nonce used in your CSP script-src and style-src directives. |
+
+**InitializeAndroidOptions**
+
+| Property      | Type   | Optional | Description                                                                                                                                    |
+| ------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `orientation` | `int?` | Yes      | Screen orientation for the support view. Use `Orientation` constants. If not set, portrait is used on phones and unspecified on large screens. |
+
+**Orientation constants**
+
+| Constant                  | Value | Description                         |
+| ------------------------- | ----- | ----------------------------------- |
+| `Orientation.Unspecified` | `-1`  | No preference — the system chooses. |
+| `Orientation.Landscape`   | `0`   | Lock to landscape.                  |
+| `Orientation.Portrait`    | `1`   | Lock to portrait.                   |
+
+If you want to use other orientations on Android, you can also pass the corresponding integer from the [ActivityInfo](https://developer.android.com/reference/android/content/pm/ActivityInfo) class.
+
+```csharp Example
+TheymesSdk.Initialize("<token>", "<domain>", new InitializeOptions
+{
+    web = new InitializeWebOptions
+    {
+        canvasSelector = "#gameCanvas",
+        nonce = "your-csp-nonce"
+    }
+});
+```
+
+See [Configuring the SDK - WebGL options](/developers/sdk/unity/configuring#webgl-options) for more information.
+
+```csharp Android orientation example
+TheymesSdk.Initialize("<token>", "<domain>", new InitializeOptions
+{
+    android = new InitializeAndroidOptions
+    {
+        orientation = Orientation.Landscape
+    }
+});
+```
+
+See [Configuring the SDK - Android options](/developers/sdk/unity/configuring#android-options) for more information.
+
+## Opening and closing
+
+### OpenSupport
+
+```csharp
+public static void OpenSupport()
+public static void OpenSupport(TheymesConfig config)
+public static Task OpenSupportAsync()
+public static Task OpenSupportAsync(TheymesConfig config)
+```
+
+The `TheymesSdk.OpenSupport()` method opens the help center. The help center is opened on top of the current scene.
+
+`OpenSupportAsync()` is available on all supported Unity platforms. On iOS and Android, it behaves the same as `OpenSupport()`, so it does not matter which one you use. On Windows, macOS, Linux, and in the Unity Editor, you can await it if you want to show loading UI while the SDK creates a support session before opening the public support site in the system browser.
+
+`TheymesConfig` can optionally be used to customize the help center. See [Configuring the SDK](/developers/sdk/unity/configuring) for more information.
+
+### OpenResource
+
+```csharp
+public static void OpenResource(string resource)
+public static void OpenResource(string resource, TheymesConfig config)
+public static Task OpenResourceAsync(string resource)
+public static Task OpenResourceAsync(string resource, TheymesConfig config)
+```
+
+Opens a specific resource from Theymes. This can be an article such as a game guide or patch notes, or a collector to gather feedback or bug reports from players. The player is returned to the game after interacting with the resource.
+
+`OpenResourceAsync()` is available on all supported Unity platforms. On iOS and Android, it behaves the same as `OpenResource()`, so it does not matter which one you use. On Windows, macOS, Linux, and in the Unity Editor, you can await it if you want to show loading UI while the SDK creates a support session for the resource shortcut before opening the public support site in the system browser.
+
+You can get the value for `resource` argument from Theymes application, for example `TheymesSdk.OpenResource("crafting-guide")`.
+
+`TheymesConfig` can optionally be used to customize the resource. See [Configuring the SDK](/developers/sdk/unity/configuring) for more information.
+
+### Close
+
+```csharp
+public static void Close()
+```
+
+Can be used to close the help center or any other resource that is opened with `TheymesSdk.OpenResource()`. Normally you don't need to call this method, as the player will see a close button in the SDK UI, but if you need to close the resource programmatically, you can use this method.
+
+## Notifications
+
+<Info>
+Notifications can be shown to user when there's a new message in their open tickets. Typically you would call `EnableNotifications()` when transitioning to game menus or other screens where the player is not actively playing, and `DisableNotifications()` when transitioning to gameplay.
+
+Notifications are disabled by default.
+</Info>
+
+### RequestNotificationPermission
+
+```csharp
+public static void RequestNotificationPermission()
+```
+
+Requests permission to show notifications to the player. Should be called as part of game initialization flow.
+
+### EnableNotifications
+
+```csharp
+public static void EnableNotifications()
+```
+
+Enables in-game notifications to be shown to the player.
+
+### DisableNotifications
+
+```csharp
+public static void DisableNotifications()
+```
+
+Disables in-game notifications to be shown to the player.
+
+### RegisterPushToken
+
+```csharp
+public static void RegisterPushToken(string token, PushTokenType type)
+```
+
+Registers a device push token with Theymes to allow sending push notifications to the user. `PushTokenType.FCM` and `PushTokenType.APNS` are allowed values for the type argument. See [push notifications](/developers/sdk/unity/push-notifications#handling-tapped-push-notifications) for more information.
+
+### HandleNotification
+
+```csharp
+public static void HandleNotification(bool opened, IDictionary<string, string> data)
+```
+
+Handles incoming push notification. Only necessary to call on Android with FCM, but can also be called for other platforms, which will be noop. See [push notifications](/developers/sdk/unity/push-notifications#handling-tapped-push-notifications) for more information.
+
+### HandlePendingNotificationAction
+
+```csharp
+public static void HandlePendingNotificationAction()
+```
+
+Handles pending notification actions from background notification taps. See [push notifications](/developers/sdk/unity/push-notifications#handling-tapped-push-notifications) for more information.
+
+### HasPendingNotificationAction
+
+```csharp
+public static bool HasPendingNotificationAction()
+```
+
+Checks whether there's a pending notification action. See [push notifications](/developers/sdk/unity/push-notifications#handling-tapped-push-notifications) for more information.
+
+### IsTheymesNotification
+
+```csharp
+public static bool IsTheymesNotification(IDictionary<string, string> data)
+```
+
+Checks whether a notification is targeted for Theymes.
+
+## Config
+
+### GetLanguage
+
+```csharp
+public static string GetLanguage()
+```
+
+Returns the currently set language, or `null` if no language is set.
+
+### SetLanguage
+
+```csharp
+public static void SetLanguage(string language)
+```
+
+Sets the language in which the help center will be displayed.
+
+### GetPlayer
+
+```csharp
+public static TheymesPlayer GetPlayer()
+```
+
+Returns the currently set player information, or `null` if no player information is set.
+
+### SetPlayer
+
+```csharp
+public static void SetPlayer(TheymesPlayer player)
+```
+
+Sets the player information. See [Configuring the SDK](/developers/sdk/unity/configuring#player) for more information.
+
+### GetSignedMetadataToken
+
+```csharp
+public static string GetSignedMetadataToken()
+```
+
+Returns the currently set signed metadata token. See [Player Verification](/developers/player-metadata/player-verification) for more information.
+
+### SetSignedMetadataToken
+
+```csharp
+public static void SetSignedMetadataToken(string token)
+```
+
+Sets the player information. See [Configuring the SDK](/developers/sdk/unity/configuring#player) for more information.
+
+## Tags
+
+Tags can be used to send additional information to Theymes. The tag must be configured in the Theymes application first or otherwise it will be ignored.
+
+### GetTags
+
+```csharp
+public static List<string> GetTags()
+```
+
+Returns the currently set tags.
+
+### SetTags
+
+```csharp
+public static void SetTags(List<string> tags)
+```
+
+Overwrites the currently set tags with the new list of tags.
+
+### AddTag
+
+```csharp
+public static void AddTag(string tag)
+```
+
+Appends a new tag to the currently set tags.
+
+### AddTags
+
+```csharp
+public static void AddTags(List<string> tags)
+```
+
+Appends new tags to the currently set tags.
+
+### RemoveTag
+
+```csharp
+public static void RemoveTag(string tag)
+```
+
+Removes a tag from the currently set tags.
+
+### RemoveTags
+
+```csharp
+public static void RemoveTags(List<string> tags)
+```
+
+Removes tags from the currently set tags.
+
+### RemoveAllTags
+
+```csharp
+public static void RemoveAllTags()
+```
+
+Removes all currently set tags.
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages that are timestamped automatically and sent when opening support or a resource. They are kept in memory only and are cleared by `ClearBreadcrumbs()` and `Reset()`.
+
+### AddBreadcrumb
+
+```csharp
+public static void AddBreadcrumb(string breadcrumb)
+```
+
+Appends a breadcrumb to the current breadcrumb list.
+
+### AddBreadcrumbs
+
+```csharp
+public static void AddBreadcrumbs(IList<string> breadcrumbs)
+```
+
+Appends multiple breadcrumbs to the current breadcrumb list.
+
+### ClearBreadcrumbs
+
+```csharp
+public static void ClearBreadcrumbs()
+```
+
+Removes all currently set breadcrumbs.
+
+## Fields
+
+Fields are a set of key-value pairs that can be used to send additional information to Theymes. The field must be configured in the Theymes application first or otherwise it will be ignored.
+
+The value type for the fields is `object`, but accepted values are booleans, strings, numbers and lists of strings. The type must match the type configured in Theymes or it will be ignored.
+
+### GetFields
+
+```csharp
+public static Dictionary<string, object> GetFields()
+```
+
+Returns the currently set fields.
+
+### SetFields
+
+```csharp
+public static void SetFields(Dictionary<string, object> fields)
+```
+
+Overwrites the currently set fields with the new list of fields.
+
+### AddField
+
+```csharp
+public static void AddField(string fieldKey, object fieldValue)
+```
+
+Appends a new field to the currently set fields.
+
+### AddFields
+
+```csharp
+public static void AddFields(Dictionary<string, object> fields)
+```
+
+Appends new fields to the currently set fields.
+
+### RemoveField
+
+```csharp
+public static void RemoveField(string fieldKey)
+```
+
+Removes a field from the currently set fields.
+
+### RemoveFields
+
+```csharp
+public static void RemoveFields(List<string> fieldKeys)
+```
+
+Removes fields from the currently set fields.
+
+### RemoveAllFields
+
+```csharp
+public static void RemoveAllFields()
+```
+
+Removes all currently set fields.
+
+## Privacy
+
+### IsYoungPlayer
+
+```csharp
+public static bool IsYoungPlayer()
+```
+
+Returns `true` if the player is set as a young player, otherwise `false`.
+
+### SetYoungPlayer
+
+```csharp
+public static void SetYoungPlayer(bool youngPlayer)
+```
+
+Sets whether the player is a young player.
+
+<Info>
+Setting the player as a young player will also enable the privacy mode, you do not need to call `SetPrivacyMode(true)` separately. Additionally support agents will see that they are talking to a young player and can handle the conversation accordingly.
+</Info>
+
+### IsPrivacyMode
+
+```csharp
+public static bool IsPrivacyMode()
+```
+
+Returns `true` if the privacy mode is enabled, otherwise `false`.
+
+### SetPrivacyMode
+
+```csharp
+public static void SetPrivacyMode(bool privacyMode)
+```
+
+Sets whether the privacy mode is enabled.
+
+## Other
+
+```csharp
+public static bool IsSupported()
+```
+
+Returns `true` if the help center is supported on the current platform, otherwise `false`.
+
+### GetSdkVersion
+
+```csharp
+public static string GetSdkVersion()
+```
+
+Returns the version of the Unity SDK package.
+
+### GetNativeSdkVersion
+
+```csharp
+public static string GetNativeSdkVersion()
+```
+
+Returns the underlying native SDK version on iOS, Android, and WebGL. On standalone/editor builds this returns the Unity SDK package version.
+
+### Reset
+
+```csharp
+public static void Reset()
+```
+
+Resets the SDK to its initial state. This can be useful if you have a logout flow and you want to clear all the player, fields, tags and breadcrumbs state.
+
+### GetUnreadMessageCount
+
+```csharp
+public static int GetUnreadMessageCount()
+```
+
+Returns the number of unread messages. You can use this to update your game's UI to show an indicator or badge for unread messages.
+
+### GetUnansweredMessageCount
+
+```csharp
+public static int GetUnansweredMessageCount()
+```
+
+Returns the number of unanswered messages. You can use this to update your game's UI to show an indicator or badge for unanswered messages.
+
+## Events
+
+All events are always called in the main thread.
+
+### onOpen
+
+```csharp
+public static event System.Action onOpen;
+```
+
+Called whenever the help center is opened.
+
+### onClose
+
+```csharp
+public static event System.Action onClose;
+```
+
+Called whenever the help center is closed.
+
+### onUnreadMessageCountUpdated
+
+```csharp
+public static event System.Action<int> onUnreadMessageCountUpdated;
+```
+
+Called whenever the number of unread messages changes. You can use this to update your game's UI to show an indicator or badge for unread messages.
+
+### onUnansweredMessageCountUpdated
+
+```csharp
+public static event System.Action<int> onUnansweredMessageCountUpdated;
+```
+
+Called whenever the number of unanswered messages changes. You can use this to update your game's UI to show an indicator or badge for unanswered messages.
+
+### onSignedMetadataTokenExpirationUpdated
+
+```csharp
+public static event System.Action<int> onSignedMetadataTokenExpirationUpdated;
+```
+
+Called only when a signed metadata token is set. The event is called immediately when the game comes to the foreground and then once a minute while the game stays in the foreground. The callback receives the remaining expiration time in seconds. If the token is already expired, the value is `0` or negative. Your game decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.

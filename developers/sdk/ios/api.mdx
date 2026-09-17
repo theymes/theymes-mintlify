@@ -1,0 +1,737 @@
+---
+title: "API Reference"
+description: "All SDK methods are static and are called on the Theymes class."
+---
+
+All SDK methods are static and are called on the `Theymes` class.
+
+<Info>
+**Important**
+
+Before you can use any other functions of the SDK, you must initialize it. See [Installing the SDK](/developers/sdk/ios/installing) for more information.
+</Info>
+
+## Initialization
+
+### initialize
+
+Initializes the SDK with the given token and domain. You can optionally pass an `options` dictionary to override the SDK API domain.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.initialize(token: String, domain: String)
+Theymes.initialize(token: String, domain: String, options: NSDictionary?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)initializeWithToken:(NSString *)token domain:(NSString *)domain;
++ (void)initializeWithToken:(NSString *)token domain:(NSString *)domain options:(NSDictionary *)options;
+```
+
+  
+</Tab>
+</Tabs>
+
+**Options (optional)** — when passing the third parameter:
+
+| Key         | Type     | Description                                      |
+| ----------- | -------- | ------------------------------------------------ |
+| `apiDomain` | `string` | Override the default API domain used by the SDK. |
+
+## Opening and closing
+
+### openSupport
+
+Opens the help center. Optionally pass a config dictionary to customize it. See [Configuring the SDK](/developers/sdk/ios/configuring) for more information.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.openSupport()
+Theymes.openSupport(config: [String: Any]?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)openSupport;
++ (void)openSupportWithConfig:(NSDictionary *_Nullable)config;
+```
+
+  
+</Tab>
+</Tabs>
+
+### openResource
+
+Opens a specific resource from Theymes (e.g. an article or collector). You can get the resource identifier from the Theymes application.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.openResource(_ resource: String)
+Theymes.openResource(_ resource: String, config: [String: Any]?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)openResource:(NSString *)resource;
++ (void)openResource:(NSString *)resource config:(NSDictionary *_Nullable)config;
+```
+
+  
+</Tab>
+</Tabs>
+
+### close
+
+Closes the help center or resource that was opened with `openSupport` or `openResource`. Normally the user sees a close button; use this to close programmatically.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.close()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)close;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Notifications
+
+<Info>
+Notifications can be shown when there's a new message in the user's open tickets. Typically you would call `enableNotifications()` when transitioning to menus or other screens, and `disableNotifications()` when transitioning to gameplay. Notifications are disabled by default.
+</Info>
+
+### requestNotificationPermission
+
+Requests permission to show notifications. Call as part of your app initialization flow.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.requestNotificationPermission()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)requestNotificationPermission;
+```
+
+  
+</Tab>
+</Tabs>
+
+### enableNotifications
+
+Enables in-game notifications to be shown to the player.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.enableNotifications()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)enableNotifications;
+```
+
+  
+</Tab>
+</Tabs>
+
+### disableNotifications
+
+Disables in-game notifications.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.disableNotifications()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)disableNotifications;
+```
+
+  
+</Tab>
+</Tabs>
+
+### getUnreadMessageCount
+
+Returns the number of unread messages. You can use this to show a badge or indicator in your UI.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getUnreadMessageCount() -> Int
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSInteger)getUnreadMessageCount;
+```
+
+  
+</Tab>
+</Tabs>
+
+### getUnansweredMessageCount
+
+Returns the number of unanswered messages. You can use this to show a badge or indicator in your UI.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getUnansweredMessageCount() -> Int
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSInteger)getUnansweredMessageCount;
+```
+
+  
+</Tab>
+</Tabs>
+
+### registerPushToken
+
+Registers a device push token with Theymes. Use `PushTokenType.apns` for Apple Push Notification service or `PushTokenType.fcm` for Firebase Cloud Messaging. See [Push notifications](/developers/sdk/ios/push-notifications) for more information.
+
+You can pass either a string (e.g. FCM token) or the raw device token data from `didRegisterForRemoteNotificationsWithDeviceToken` (APNs); the SDK converts the latter to the expected string format internally.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// String (e.g. FCM token or pre-converted APNs token)
+Theymes.registerPushToken(_ pushToken: String, type: PushTokenType)
+
+// Raw device token (e.g. from didRegisterForRemoteNotificationsWithDeviceToken)
+Theymes.registerPushToken(_ deviceToken: Data, type: PushTokenType)
+// PushTokenType: .apns, .fcm
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// String (e.g. FCM token or pre-converted APNs token)
++ (void)registerPushToken:(NSString *)pushToken type:(PushTokenType)type;
+
+// Raw device token (e.g. from didRegisterForRemoteNotificationsWithDeviceToken:)
++ (void)registerPushTokenWithDeviceToken:(NSData *)deviceToken type:(PushTokenType)type;
+// PushTokenTypeApns, PushTokenTypeFcm
+```
+
+  
+</Tab>
+</Tabs>
+
+### handlePendingNotificationAction
+
+Handles a pending notification action when the user tapped a push notification while the app was in the background. Call this when your app becomes active (e.g. in `applicationDidBecomeActive`). See [Push notifications](/developers/sdk/ios/push-notifications#handling-tapped-push-notifications) for more information.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.handlePendingNotificationAction() -> Bool
+Theymes.handlePendingNotificationAction(_ config: [AnyHashable: Any]?) -> Bool
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (BOOL)handlePendingNotificationAction;
++ (BOOL)handlePendingNotificationAction:(NSDictionary *_Nullable)config;
+```
+
+  
+</Tab>
+</Tabs>
+
+### hasPendingNotificationAction
+
+Returns whether there is a pending notification action to handle.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.hasPendingNotificationAction() -> Bool
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (BOOL)hasPendingNotificationAction;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Config
+
+### getLanguage / setLanguage
+
+Get or set the language in which the help center will be displayed.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getLanguage() -> String?
+Theymes.setLanguage(_ language: String?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSString *_Nullable)getLanguage;
++ (void)setLanguage:(NSString *_Nullable)language;
+```
+
+  
+</Tab>
+</Tabs>
+
+### getPlayer / setPlayer
+
+Get or set the player information. See [Configuring the SDK](/developers/sdk/ios/configuring#player) for more information.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getPlayer() -> NSDictionary?
+Theymes.setPlayer(_ player: NSDictionary?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSDictionary *_Nullable)getPlayer;
++ (void)setPlayer:(NSDictionary *_Nullable)player;
+```
+
+  
+</Tab>
+</Tabs>
+
+### getSignedMetadataToken / setSignedMetadataToken
+
+Get or set the signed metadata token for [Player Verification](/developers/player-metadata/player-verification).
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getSignedMetadataToken() -> String?
+Theymes.setSignedMetadataToken(_ token: String?)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSString *_Nullable)getSignedMetadataToken;
++ (void)setSignedMetadataToken:(NSString *_Nullable)token;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Tags
+
+Tags can be used to send additional information to Theymes. The tag must be configured in the Theymes application first or it will be ignored.
+
+### getTags / setTags
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getTags() -> [String]
+Theymes.setTags(_ tags: [String])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSArray<NSString *> *)getTags;
++ (void)setTags:(NSArray<NSString *> *)tags;
+```
+
+  
+</Tab>
+</Tabs>
+
+### addTag / addTags
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.addTag(_ tag: String)
+Theymes.addTags(_ tags: [String])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)addTag:(NSString *)tag;
++ (void)addTags:(NSArray<NSString *> *)tags;
+```
+
+  
+</Tab>
+</Tabs>
+
+### removeTag / removeTags / removeAllTags
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.removeTag(_ tag: String)
+Theymes.removeTags(_ tags: [String])
+Theymes.removeAllTags()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)removeTag:(NSString *)tag;
++ (void)removeTags:(NSArray<NSString *> *)tags;
++ (void)removeAllTags;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages that are timestamped automatically and sent when opening support or a resource. They are kept in memory only and are cleared by `clearBreadcrumbs()` and `reset()`.
+
+### addBreadcrumb / addBreadcrumbs
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.addBreadcrumb(_ breadcrumb: String)
+Theymes.addBreadcrumbs(_ breadcrumbs: [String])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)addBreadcrumb:(NSString *)breadcrumb;
++ (void)addBreadcrumbs:(NSArray<NSString *> *)breadcrumbs;
+```
+
+  
+</Tab>
+</Tabs>
+
+### clearBreadcrumbs
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.clearBreadcrumbs()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)clearBreadcrumbs;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Fields
+
+Fields are key-value pairs that can be used to send additional information to Theymes. Values can be booleans, strings, numbers, or arrays of strings. The field must be configured in the Theymes application first or it will be ignored.
+
+### getFields / setFields
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getFields() -> [String: Any]
+Theymes.setFields(_ fields: [String: Any])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSDictionary *)getFields;
++ (void)setFields:(NSDictionary *)fields;
+```
+
+  
+</Tab>
+</Tabs>
+
+### addField / addFields
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.addField(_ key: String, value: Any)
+Theymes.addFields(_ fields: [String: Any])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)addField:(NSString *)key value:(id)value;
++ (void)addFields:(NSDictionary *)fields;
+```
+
+  
+</Tab>
+</Tabs>
+
+### removeField / removeFields / removeAllFields
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.removeField(_ field: String)
+Theymes.removeFields(_ fields: [String])
+Theymes.removeAllFields()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)removeField:(NSString *)field;
++ (void)removeFields:(NSArray<NSString *> *)fields;
++ (void)removeAllFields;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Privacy
+
+### isYoungPlayer / setYoungPlayer
+
+Setting the player as a young player also enables privacy mode and lets support agents know they are talking to a young player.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.isYoungPlayer() -> Bool
+Theymes.setYoungPlayer(_ youngPlayer: Bool)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (BOOL)isYoungPlayer;
++ (void)setYoungPlayer:(BOOL)youngPlayer;
+```
+
+  
+</Tab>
+</Tabs>
+
+### isPrivacyMode / setPrivacyMode
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.isPrivacyMode() -> Bool
+Theymes.setPrivacyMode(_ privacyMode: Bool)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (BOOL)isPrivacyMode;
++ (void)setPrivacyMode:(BOOL)privacyMode;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Other
+
+### isSupported
+
+Returns whether the help center is supported on the current device (iOS 14+).
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.isSupported() -> Bool
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (BOOL)isSupported;
+```
+
+  
+</Tab>
+</Tabs>
+
+### getSdkVersion
+
+Returns the version of the SDK.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.getSdkVersion() -> String
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (NSString *)getSdkVersion;
+```
+
+  
+</Tab>
+</Tabs>
+
+### reset
+
+Resets the SDK to its initial state (clears player, fields, tags and breadcrumbs). Useful for logout flows.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.reset()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)reset;
+```
+
+  
+</Tab>
+</Tabs>
+
+### enableLogging / disableLogging
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.enableLogging()
+Theymes.disableLogging()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
++ (void)enableLogging;
++ (void)disableLogging;
+```
+
+  
+</Tab>
+</Tabs>
+
+## Events (Delegate)
+
+iOS uses a delegate instead of events. Set `Theymes.delegate` to an object that conforms to `TheymesDelegate`. All delegate methods are optional. Callbacks are invoked on the main thread.
+
+| Delegate method                              | Description                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `didOpen()`                                  | Called when the help center is opened.                                                                    |
+| `didClose()`                                 | Called when the help center is closed.                                                                    |
+| `didUpdateUnreadMessageCount(_:)`            | Called when the unread message count changes. Use this to update your UI (e.g. badge).                    |
+| `didUpdateUnansweredMessageCount(_:)`        | Called when the unanswered message count changes. Use this to update your UI (e.g. badge).                |
+| `didUpdateSignedMetadataTokenExpiration(_:)` | Called once a minute with the signed metadata token expiration time left in seconds while the app is in the foreground. |
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+class MyTheymesDelegate: TheymesDelegate {
+    func didOpen() { /* help center opened */ }
+    func didClose() { /* help center closed */ }
+    func didUpdateUnreadMessageCount(_ count: Int) { /* update badge */ }
+    func didUpdateUnansweredMessageCount(_ count: Int) { /* update badge */ }
+    func didUpdateSignedMetadataTokenExpiration(_ expiresInSeconds: Int) { /* refresh token if needed */ }
+}
+
+// Set the delegate (e.g. in application didFinishLaunching)
+Theymes.delegate = MyTheymesDelegate()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+@interface MyTheymesDelegate : NSObject <TheymesDelegate>
+@end
+
+@implementation MyTheymesDelegate
+- (void)didOpen { /* help center opened */ }
+- (void)didClose { /* help center closed */ }
+- (void)didUpdateUnreadMessageCount:(NSInteger)count { /* update badge */ }
+- (void)didUpdateUnansweredMessageCount:(NSInteger)count { /* update badge */ }
+- (void)didUpdateSignedMetadataTokenExpiration:(NSInteger)expiresInSeconds { /* refresh token if needed */ }
+@end
+
+// Set the delegate (e.g. in application didFinishLaunching)
+Theymes.delegate = [[MyTheymesDelegate alloc] init];
+```
+
+  
+</Tab>
+</Tabs>
+
+`didUpdateSignedMetadataTokenExpiration(_:)` is called only when a signed metadata token is set. It is called immediately when the app comes to the foreground and then once a minute while the app stays in the foreground. The delegate method receives the remaining expiration time in seconds. If the token is already expired, the value is `0` or negative. Your game decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.

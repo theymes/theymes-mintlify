@@ -1,0 +1,68 @@
+---
+title: "Automation"
+description: "Automation lets you run repeatable support processes automatically in Theymes. You can react to events, collect information from tickets and players, call external services, upd..."
+---
+
+Automation lets you run repeatable support processes automatically in Theymes. You can react to events, collect information from tickets and players, call external services, update tickets, and route work based on conditions.
+
+An automation is built from nodes:
+
+- A **trigger** starts the automation.
+- **Actions** run after the trigger.
+- **Switches** can split the automation into multiple branches.
+- **Variables** let later actions use information from the trigger or earlier actions.
+
+## Automation types
+
+Theymes supports two customer-facing automation types.
+
+| Type | Use it for | Example |
+| ---- | ---------- | ------- |
+| Trigger automation | Running automatically when something happens | Send a Slack message when a high-priority ticket is created. |
+| Workflow | Letting an agent run a saved process manually from a ticket | Escalate a ticket, add a private note, assign it to a specialist, and put it on hold. |
+
+## How an automation runs
+
+1. A trigger starts the automation.
+2. The trigger checks its filters.
+3. The automation runs each connected action in order.
+4. If a switch is used, the first matching branch is followed.
+5. The run is saved in the automation's run history.
+
+If an action fails, the run is marked as failed and the error is shown in the run details.
+
+## App/Game scope
+
+Automations can be scoped by App/Game. App/Game scope controls where the automation is available and which tickets or resources it can access.
+
+Use a narrower App/Game scope when an automation only applies to a specific App/Game. Use a company-wide scope only when the same behavior should apply across every App/Game.
+
+## Drafts and publishing
+
+Saving an automation stores your current draft. Publishing makes the latest saved version active.
+
+After publishing, future events use the published version. If you edit an automation after publishing, save and publish again to make the changes active.
+
+## Automation order
+
+You can reorder automations from the automation list. The list order controls the order in which matching automations are evaluated and run for the same trigger type.
+
+For example, if two Ticket created automations both match the same new ticket, Theymes evaluates them in the order shown in the Triggers list.
+
+Ordering applies between automations. If a single automation contains multiple trigger nodes, those trigger nodes are not ordered separately in the list.
+
+## Common examples
+
+- Notify a Slack channel when a new ticket matches specific filters.
+- Send a message to a player when a ticket has been waiting too long.
+- Call an external API when a collector is submitted.
+- Add tags or custom fields to a ticket based on player metadata.
+- Create a manual escalation workflow for agents.
+
+## Next steps
+
+- Learn about [triggers](/developers/automation/triggers).
+- Learn about [actions and switches](/developers/automation/actions-and-switches).
+- Learn how to use [Liquid variables](/developers/automation/liquid-variables).
+- Learn how to create [manual workflows](/developers/automation/workflows).
+- Learn how to inspect [runs and errors](/developers/automation/runs-and-errors).

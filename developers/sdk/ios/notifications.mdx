@@ -1,0 +1,79 @@
+---
+title: "Notifications"
+description: "Theymes SDK supports three kinds of notifications:"
+---
+
+Theymes SDK supports three kinds of notifications:
+
+- In-game notification badges
+- In-game text notifications
+- Background text notifications (push)
+
+By default the SDK periodically polls for notification events for players who have engaged with support. When there's a new notification, you can show a text notification in-app or display a badge in your UI.
+
+Control whether text notifications are shown while the app is in the foreground by calling [`Theymes.enableNotifications()`](/developers/sdk/ios/api#enablenotifications) and [`Theymes.disableNotifications()`](/developers/sdk/ios/api#disablenotifications). In-game text notifications are disabled by default. Typically you enable them when the player is in menus and disable them during gameplay.
+
+## In-game notification badges
+
+You can show a badge for:
+
+- **Unread messages** – badge when the player has messages they haven't read.
+- **Unanswered messages** – badge when the ticket is waiting for the player to reply (even if they read the message).
+
+To set up badges:
+
+1. Implement the [`TheymesDelegate`](/developers/sdk/ios/api#events-delegate) and set `Theymes.delegate`. Use `didUpdateUnreadMessageCount(_:)` and/or `didUpdateUnansweredMessageCount(_:)` to react to count changes.
+2. Get the initial count with [`Theymes.getUnreadMessageCount()`](/developers/sdk/ios/api#getunreadmessagecount) or [`Theymes.getUnansweredMessageCount()`](/developers/sdk/ios/api#getunansweredmessagecount). We recommend setting the delegate first so you don't miss updates.
+3. Use the count to display a badge in your UI.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+class AppDelegate: TheymesDelegate {
+    func didUpdateUnreadMessageCount(_ count: Int) {
+        updateBadge(count)
+    }
+    func didUpdateUnansweredMessageCount(_ count: Int) {
+        updateUnansweredBadge(count)
+    }
+}
+Theymes.delegate = appDelegate
+let initial = Theymes.getUnreadMessageCount()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+- (void)didUpdateUnreadMessageCount:(NSInteger)count {
+    [self updateBadge:count];
+}
+- (void)didUpdateUnansweredMessageCount:(NSInteger)count {
+    [self updateUnansweredBadge:count];
+}
+Theymes.delegate = self;
+NSInteger initial = [Theymes getUnreadMessageCount];
+```
+
+  
+</Tab>
+</Tabs>
+
+## In-game text notifications
+
+Theymes uses native iOS notifications to show in-game text notifications. You need to:
+
+1. Request notification permission from the user.
+2. Enable notifications with [`Theymes.enableNotifications()`](/developers/sdk/ios/api#enablenotifications).
+
+You can request permission using the system APIs (e.g. `UNUserNotificationCenter`) or use Theymes' convenience API: [`Theymes.requestNotificationPermission()`](/developers/sdk/ios/api#requestnotificationpermission).
+
+<Tip>
+To get an APNs device token for push notifications, use the system APIs (e.g. `registerForRemoteNotifications` and `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)` in your `AppDelegate`). Then pass the token to Theymes with [`Theymes.registerPushToken(_:type:)`](/developers/sdk/ios/api#registerpushtoken) using `PushTokenType.apns`.
+</Tip>
+
+## Background notifications
+
+To show notifications when the app is in the background, set up push notifications. Theymes supports **both FCM and APNs** on iOS. Notifications are delivered in real time; when the app is in the foreground, Theymes respects whether in-game notifications are enabled. Badge counts are updated immediately when a push is received.
+
+See [Push notifications](/developers/sdk/ios/push-notifications) for setup.

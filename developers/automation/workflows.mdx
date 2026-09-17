@@ -1,0 +1,79 @@
+---
+title: "Workflows"
+description: "Workflows are automations that agents run manually from a ticket. Use workflows for repeatable processes that still need an agent's judgment, such as escalations, refunds, inves..."
+---
+
+Workflows are automations that agents run manually from a ticket. Use workflows for repeatable processes that still need an agent's judgment, such as escalations, refunds, investigations, or handoffs.
+
+## When to use a workflow
+
+Use a workflow when:
+
+- An agent should decide when the process starts.
+- The process needs extra input from the agent.
+- The same set of ticket updates, notes, messages, or assignments happens repeatedly.
+- You want the process to appear only for tickets that match specific filters.
+
+Use a trigger automation instead when the process should run automatically as soon as an event happens.
+
+## Workflow availability
+
+A workflow appears on a ticket only when:
+
+- The workflow is enabled and published.
+- The ticket matches the workflow trigger filters.
+- The ticket is in the workflow's App/Game scope.
+- The agent has access to that App/Game scope.
+
+This lets you create specialized workflows for specific Apps/Games, languages, tags, player tiers, platforms, or custom fields.
+
+Workflows are shown in the order configured in the Workflows list. Drag workflows in that list to change the order agents see when several workflows are available for a ticket.
+
+## Workflow inputs
+
+Workflows can ask the agent for information before running. Supported input types include:
+
+| Input type   | Use it for                                               |
+| ------------ | -------------------------------------------------------- |
+| Free text    | Notes, reasons, external IDs, or short instructions.     |
+| User         | Selecting a Theymes user.                                |
+| Custom field | Capturing a value using an existing custom field format. |
+| Select       | Choosing one option from a list.                         |
+| Multiselect  | Choosing multiple options from a list.                   |
+
+Inputs can be required or optional. Required inputs must be filled before the workflow can run.
+
+Free-text inputs can also have:
+
+- A **prefill**, which is a Liquid template rendered against the ticket when the agent opens the workflow. The rendered text is the initial value and can still be edited. For example, `{{ trigger.issueSummary }}` prefills the ticket summary.
+- A **placeholder**, which is hint text shown when the field is empty.
+
+Input values are available to later actions as Liquid variables. See [Liquid variables](/developers/automation/liquid-variables#workflow-inputs).
+
+## Example: escalation workflow
+
+An escalation workflow might:
+
+1. Ask the agent for an escalation reason.
+2. Add a private note containing the reason.
+3. Add an `escalated` tag.
+4. Assign the ticket to a specialist.
+5. Put the ticket on hold.
+6. Send a Slack message to the escalation channel.
+
+The private note could use a Liquid template like:
+
+```liquid
+Escalated by {{ trigger.userDisplayName }}
+
+Reason:
+{{ trigger.inputs.escalationReason }}
+```
+
+## Best practices
+
+- Give workflows clear names that describe the agent action, such as `Escalate to payments`.
+- Use filters so agents only see relevant workflows.
+- Use required inputs for information the process depends on.
+- Add a private note when a workflow changes ticket ownership, status, or priority.
+- Check the run history after publishing a workflow to confirm it behaves as expected.

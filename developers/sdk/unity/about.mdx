@@ -1,0 +1,32 @@
+---
+title: "About Unity SDK"
+description: "Theymes Unity SDK is a plugin for Unity that allows you to integrate Theymes into your iOS, Android, WebGL, Windows, macOS, and Linux games. It allows you to gather feedback fro..."
+---
+
+Theymes Unity SDK is a plugin for Unity that allows you to integrate Theymes into your iOS, Android, WebGL, Windows, macOS, and Linux games. It allows you to gather feedback from your players, provide in-game support, and more.
+
+## Unity requirements
+
+Theymes Unity SDK should work on any modern Unity version. If Android support is needed, it is highly recommended to use at least `2022.3.44f1` (or `2021.3.44f1`) or newer, as older versions have some issues with building for latest Android SDK versions.
+
+## iOS requirements
+
+The minimum supported iOS version is 14, but the SDK will compile for older versions of iOS down to 13. Attempting to open help center or other resources will display a view to the user informing that their device is not supported.
+
+## Android requirements
+
+The minimum supported Android API version is 23 (Android 6.0), but the SDK will compile for older versions of Android down to API version 22. Attempting to open help center or other resources will display a view to the user informing that their device is not supported.
+
+<Tip>
+**Hiding features from old devices**
+
+While Theymes SDK will gracefully handle older devices, you might want to hide the whole game element that shows the help center or other resources from the user. You can do this by checking the `TheymesSdk.IsSupported()` method. If it returns `false`, you can hide the UI elements that would not function properly on older devices.
+</Tip>
+
+## WebGL requirements
+
+The WebGL SDK is supported on all modern browsers.
+
+## Windows, macOS, and Linux requirements
+
+Windows, macOS, Linux, and the Unity Editor open Theymes support in the system browser. On these platforms, `OpenSupportAsync()` and `OpenResourceAsync()` can be awaited while the SDK creates a support session before opening the browser.

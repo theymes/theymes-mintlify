@@ -1,0 +1,195 @@
+---
+title: "Push notifications"
+description: "For an overview of notification types, see Notifications. This page describes how to set up push notifications on iOS."
+---
+
+For an overview of notification types, see [Notifications](/developers/sdk/ios/notifications). This page describes how to set up push notifications on iOS.
+
+Theymes supports **both** of the following on iOS:
+
+- **Firebase Cloud Messaging (FCM)** – works on iOS 15 and newer. Use it if you want a single push solution for iOS and Android.
+- **Apple Push Notification service (APNs)** – native iOS. Use it if you already use APNs or need to support iOS versions before 15.
+
+If you don't have a push setup yet, FCM is a good choice for cross-platform. If you already use APNs or target pre–iOS 15, use APNs for iOS.
+
+## Common setup
+
+### Request permission to show notifications
+
+Request notification permission early in your app (e.g. at launch or before opening support). Theymes provides a convenience API:
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.requestNotificationPermission()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes requestNotificationPermission];
+```
+
+  
+</Tab>
+</Tabs>
+
+You can also use `UNUserNotificationCenter` directly if you need more control.
+
+### Xcode project capabilities
+
+Enable **Push Notifications** and **Background Modes > Remote notifications** in your target's Signing & Capabilities so push can work.
+
+### Notifications when the app is in foreground
+
+As described on the [Notifications](/developers/sdk/ios/notifications) page, Theymes only shows text notifications in the foreground when you have called [`Theymes.enableNotifications()`](/developers/sdk/ios/api#enablenotifications). Badge counts are always updated when a push is received.
+
+### Handling tapped push notifications
+
+When the app is in the background and the user taps a push notification, they expect to open the relevant support ticket. Call `Theymes.handlePendingNotificationAction()` when your app becomes active so Theymes can open the support view. If you don't, the app will open but the support overlay will not.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// In AppDelegate
+func applicationDidBecomeActive(_ application: UIApplication) {
+    Theymes.handlePendingNotificationAction()
+}
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// In AppDelegate
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    [Theymes handlePendingNotificationAction];
+}
+```
+
+  
+</Tab>
+</Tabs>
+
+<Info>
+Do not call `handlePendingNotificationAction()` before the SDK is initialized and [player info has been set](/developers/sdk/ios/configuring#player). When `handlePendingNotificationAction()` is called, the notification action is only handled if the logged-in player is the same player the notification was targeted for.
+</Info>
+
+## Registering the push token with Theymes
+
+After you obtain a device push token (from APNs or FCM), register it with Theymes so we can send push notifications to the device.
+
+**APNs:** The system delivers the token to your app (e.g. in `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`). Pass the `Data` device token directly to Theymes; the SDK converts it to the expected format internally.
+
+**FCM:** Use the Firebase SDK to get the FCM token, then pass the token string to Theymes with type `PushTokenType.fcm`.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// APNs (e.g. in AppDelegate)
+func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    Theymes.registerPushToken(deviceToken, type: .apns)
+}
+
+// FCM: after receiving the FCM token from Firebase
+Theymes.registerPushToken(fcmTokenString, type: .fcm)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// APNs (e.g. in AppDelegate)
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    [Theymes registerPushTokenWithDeviceToken:deviceToken type:PushTokenTypeApns];
+}
+
+// FCM: after receiving the FCM token from Firebase
+[Theymes registerPushToken:fcmTokenString type:PushTokenTypeFcm];
+```
+
+  
+</Tab>
+</Tabs>
+
+## Configuring push in the Theymes application
+
+To allow Theymes to send push notifications to your users, configure the provider in the Theymes application:
+
+1. Select your game in the left navigation.
+2. Click **Settings** at the bottom of the game navigation.
+3. Click **Push notifications**.
+4. Configure **Firebase Cloud Messaging (FCM)** and/or **Apple Push Notification service (APNs)**.
+
+Theymes supports two ways of setting up each provider: direct integration (upload credentials to Theymes) or a webhook to your own backend, where you forward the push requests yourself. Direct integration is simpler; the webhook option lets you keep credentials on your side.
+
+### FCM
+
+#### Setting up direct integration with FCM
+
+To use the service account JSON you need either an existing service account or a new one from Firebase Console. To create a new key:
+
+1. Open your project in [Firebase Console](https://console.firebase.google.com).
+2. From the top left, next to "Project Overview", click the cog icon and select **Service accounts**.
+3. Click **Generate new private key**.
+4. Confirm and generate the key.
+5. Store the file in a secure location.
+
+<Info>
+The service account needs the `cloudmessaging.messages.create` and `firebase.projects.get` permissions. These are granted by the roles `roles/firebasemessaging.admin` and `roles/firebase.viewer`.
+</Info>
+
+Upload the service account JSON on the push notifications page in the Theymes application and save.
+
+#### Setting up FCM via webhook
+
+When using a webhook, Theymes still collects the device tokens. When we need to send a push notification to a device, we send a POST request to the URL you define with the exact payload in the body that you need to forward to the [FCM API](https://firebase.google.com/docs/reference/fcm/rest). How to implement the webhook and sign requests to the FCM API is outside the scope of this documentation; see Google's documentation.
+
+To set up the webhook in Theymes you need:
+
+1. **Credentials** that Theymes will use to call your webhook URL.
+2. **The webhook URL.**
+
+Create credentials by going to **Company** > **Credentials** and clicking **Create credential**. When setting up the webhook, select the credential your webhook expects, enter the webhook URL, and click **Save**. Theymes will then send a POST request to your webhook whenever we need to send a push notification via FCM.
+
+### APNs
+
+#### Setting up direct integration with APNs
+
+You need:
+
+- A **private key (.p8)** with access to Apple Push Notification service (APNs). Create one in the [Apple Developer Portal](https://developer.apple.com) under **Keys**.
+- Your private key's **Key ID** (shown on the **Keys** page in the Apple Developer Portal).
+- Your app's **Bundle ID** (e.g. `com.yourcompany.game`).
+- Your **Team ID** (shown in the Apple Developer Portal).
+- **Environment:** sandbox for development and local testing, production for TestFlight and App Store builds.
+
+Upload the private key and fill in the other fields on the push notifications page in the Theymes application, then save.
+
+<Info>
+Theymes does not support certificate-based (.p12) connection to APNs. If you must use .p12, use the webhook option and deliver push via your own backend.
+</Info>
+
+#### Setting up APNs via webhook
+
+When using a webhook, Theymes still collects the device tokens. When we need to send a push notification to a device, we send a POST request to the URL you define. The request uses `Content-Type: application/json` and the body has this format:
+
+```json
+{
+  "authority": String,
+  "method": "POST",
+  "path": String,
+  "headers": Record<String, String>,
+  "body": String
+}
+```
+
+Your webhook should forward this request to the [APNs HTTP/2 API](https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns). The headers and body are already set for the notification; you only need to forward the request to APNs and sign it. How to create the webhook and sign requests to APNs is outside the scope of this documentation; see Apple's documentation.
+
+To set up the webhook in Theymes you need:
+
+1. **Credentials** that Theymes will use to call your webhook URL.
+2. **The webhook URL.**
+
+Create credentials by going to **Company** > **Credentials** and clicking **Create credential**. When setting up the webhook, select the credential your webhook expects, enter the webhook URL, and click **Save**. Theymes will then send a POST request to your webhook whenever we need to send a push notification via APNs.

@@ -1,0 +1,52 @@
+---
+title: "Notifications"
+description: "There are three kind of notications that Theymes SDK supports:"
+---
+
+There are three kind of notications that Theymes SDK supports:
+
+- In-game notification badges
+- In-game text notifications
+- Background text notifications
+
+By default Theymes SDK will periodically poll for notification events for players who have engaged with our support platform. When there's a new notification for the player, we can show a text notification in-game, or the game can display a notification badge in the game UI.
+
+It is up to you whether you want to allow text notifications while the game is in foreground to not disrupt gameplay by calling [`TheymesSdk.EnableNotifications()`](/developers/sdk/unity/api#enablenotifications) and [`TheymesSdk.DisableNotifications()`](/developers/sdk/unity/api#disablenotifications) respectively. By default the in-game text notifications are disabled. If you want to show in-game text notifications, you'd typically enable notifications when the player is engaging with game menus, and disable the notifications when they are in active gameplay.
+
+## In-game notification badges
+
+Theymes supports two different ways of showing in-game notification badges:
+
+- Show a notification badge when player have unread messages.
+- Show a notification badge when player have unanswered messages.
+
+The difference between the two is that the later will keep showing an notification badge even if the player has read the message from support, but did not yet respond to it and the support ticket is waiting for the player to reply back.
+
+To set up notification badges you should do three things:
+
+1. Subscribe to changes to the unread/unanswered message count events with [`onUnreadMessageCountUpdated`](/developers/sdk/unity/api#onunreadmessagecountupdated) or [`onUnansweredMessageCountUpdated`](/developers/sdk/unity/api#onunansweredmessagecountupdated) respectively.
+2. Get the initial count of unread/unanswered message count with [`GetUnreadMessageCount()`](/developers/sdk/unity/api#getunreadmessagecount) or [`GetUnansweredMessageCount()`](/developers/sdk/unity/api#getunansweredmessagecount). We recommend setting up the subscriber first to make sure you do not miss any state updates.
+3. Use the message count to display a badge in your game UI. It is up to you how/where you want to display this.
+
+## In-game text notifications
+
+Theymes uses native iOS and Android notifications to display in-game text notifications. There are two things to support showing in-game text notifications
+
+1. Request a permission from user to display notifications.
+2. Enable notifications with [`TheymesSdk.EnableNotifications()`](/developers/sdk/unity/api#enablenotifications).
+
+There are multiple ways of requesting a permission from user to display notifications. In Unity people generally use [Unity Mobile Notifications](https://docs.unity3d.com/Packages/com.unity.mobile.notifications@1.4/manual/index.html) to do so. Unity Mobile Notifications also has the added benefit that if you want to setup push notifications via APNs, it allows you to request the device token that is necessary to setup push notifications via APNs.
+
+If you for some reason don't want to use Unity Mobile Notifications and you already don't have another way of requesting the notification permissions, Theymes provides a convenience API to do so with [`TheymesSdk.RequestNotificationPermission()`](/developers/sdk/unity/api#requestnotificationpermission).
+
+<Tip>
+Theymes SDK does not provide you a way to get a device token for APNs, we recommend using Unity Mobile Notifications if you want to setup push notifications with APNs.
+</Tip>
+
+## Background notifications
+
+In order to show notifications to the player when the game is in background you need to setup push notifications. Theymes supports push notifications for both iOS and Android, using FCM (Android & iOS) and APNs (iOS).
+
+With push notifications the notifications are also delivered instantly to the player when they receive a new message. If the game is in foreground when a push notification is received, Theymes will respect the current state of whether in-game notifications are enabled or not to determine whether to show a text notification to the user or not. Regardless of whether a text notification is shown, the notification badges are updated immediately when receiving a push a notification.
+
+Setting up push notifications is covered in [Push notifications](/developers/sdk/unity/push-notifications).

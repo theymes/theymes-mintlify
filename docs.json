@@ -1,34 +1,118 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Theymes",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#FFBC0F",
+    "light": "#FFD15C",
+    "dark": "#C49200"
+  },
+  "appearance": {
+    "default": "dark"
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "pages": [
+    "tabs": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
+        "tab": "Product",
+        "pages": ["product/overview"]
+      },
+      {
+        "tab": "Developers",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["developers/index"]
+          },
+          {
+            "group": "Player metadata",
+            "pages": [
+              "developers/player-metadata/player-metadata",
+              "developers/player-metadata/player-verification",
+              "developers/player-metadata/player-verification-guide"
+            ]
+          },
+          {
+            "group": "SDK",
+            "root": "developers/sdk/about",
+            "directory": "accordion",
+            "pages": [
+              {
+                "group": "Unity",
+                "pages": [
+                  "developers/sdk/unity/about",
+                  "developers/sdk/unity/installing",
+                  "developers/sdk/unity/configuring",
+                  "developers/sdk/unity/notifications",
+                  "developers/sdk/unity/push-notifications",
+                  "developers/sdk/unity/privacy-and-young-players",
+                  "developers/sdk/unity/api"
+                ]
+              },
+              {
+                "group": "iOS",
+                "pages": [
+                  "developers/sdk/ios/about",
+                  "developers/sdk/ios/installing",
+                  "developers/sdk/ios/configuring",
+                  "developers/sdk/ios/notifications",
+                  "developers/sdk/ios/push-notifications",
+                  "developers/sdk/ios/privacy-and-young-players",
+                  "developers/sdk/ios/api"
+                ]
+              },
+              {
+                "group": "Android",
+                "pages": ["developers/sdk/android/about"]
+              },
+              {
+                "group": "Web",
+                "pages": [
+                  "developers/sdk/web/about",
+                  "developers/sdk/web/installing",
+                  "developers/sdk/web/configuring",
+                  "developers/sdk/web/using",
+                  "developers/sdk/web/web-widget",
+                  "developers/sdk/web/content-security-policy",
+                  "developers/sdk/web/api"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Automation",
+            "root": "developers/automation/overview",
+            "directory": "accordion",
+            "pages": [
+              "developers/automation/triggers",
+              "developers/automation/actions-and-switches",
+              "developers/automation/liquid-variables",
+              "developers/automation/workflows",
+              "developers/automation/runs-and-errors"
+            ]
+          },
+          {
+            "group": "API",
+            "pages": ["developers/api"]
+          }
         ]
+      },
+      {
+        "tab": "API reference",
+        "openapi": "https://api.theymes.com/openapi"
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Theymes",
+          "href": "https://theymes.com",
+          "icon": "globe"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Support app",
+          "href": "https://app.theymes.com",
+          "icon": "comments"
         }
       ]
     }
@@ -40,14 +124,14 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "theymes.com",
+        "href": "https://theymes.com"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "label": "Support app",
+      "href": "https://app.theymes.com"
     }
   },
   "contextual": {
@@ -64,9 +148,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "website": "https://theymes.com",
+      "linkedin": "https://www.linkedin.com/company/theymes"
     }
   }
 }

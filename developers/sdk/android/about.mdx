@@ -1,0 +1,20 @@
+---
+title: "About Android SDK"
+description: "Theymes has a native Android SDK for Java and Kotlin."
+---
+
+Theymes has a native Android SDK for Java and Kotlin.
+
+The documentation is not yet available, but if you want to get access to the SDK, please [contact us](https://theymes.com/contact).
+
+The API is very similar to the Unity SDK, so to get a good understanding of how to use it and what is available, you can read the [Unity SDK documentation](/developers/sdk/unity/about).
+
+## Android requirements
+
+The minimum supported Android API version is 23 (Android 6.0), but the SDK will compile for older versions of Android down to API version 22. Attempting to open help center or other resources will display a view to the user informing that their device is not supported.
+
+<Tip>
+**Hiding features from old devices**
+
+While Theymes SDK will gracefully handle older devices, you might want to hide the whole game element that shows the help center or other resources from the user. You can do this by checking the `TheymesSdk.IsSupported()` method. If it returns `false`, you can hide the UI elements that would not function properly on older devices.
+</Tip>

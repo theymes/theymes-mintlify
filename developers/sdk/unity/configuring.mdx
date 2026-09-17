@@ -1,0 +1,192 @@
+---
+title: "Configuring the SDK"
+description: "There are many options to customize the SDK to your needs. Theymes provides flexible way of configuring the SDK either by passing a TheymesConfig object to functions or by setti..."
+---
+
+There are many options to customize the SDK to your needs. Theymes provides flexible way of configuring the SDK either by passing a `TheymesConfig` object to functions or by setting configuration options directly in the `TheymesSdk` class, in which case they are persisted and passed to the help center when opened later.
+
+You can even use both methods together. When Theymes opens the help center it will merge the configuration options from both methods.
+
+<Tip>
+**Prefer persisting configuration options**
+
+Persisting the options such as fields and tags is preferred, as it ensures that the help center will always open with the correct configuration and allows other SDK features to use them.
+</Tip>
+
+## Language
+
+[ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language code in which the help center should be displayed. If not set, we will prefer the language of the device the game is running on, and if that is not available, we will default to English. **Note, some languages do not support two-letter ISO-639-1 code**, so for those languages you need to give the three-letter [ISO-639-2 code](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes).
+
+You can specify any languages that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values.
+
+```csharp Example
+// persist the language using TheymesSdk.SetLanguage()
+TheymesSdk.SetLanguage("fr");
+
+// open the help center with the language, but don't persist it
+TheymesSdk.OpenSupport(
+    new TheymesConfig
+    {
+        language = "fr"
+    }
+);
+```
+
+## Player
+
+There are two ways to set the player information. You can either set it using the `TheymesSdk.SetPlayer()` method, or by using our [Player Verification](/developers/player-metadata/player-verification) feature. With the Player Verification feature you get a signed token from your backend which you can pass to the SDK with `TheymesSdk.SetSignedMetadataToken()` method.
+
+<Info>
+**Player Verification**
+
+The Player Verification allows you to verify the identity of your players. For example if someone opens a support ticket, you can be sure that the player information and optionally other metadata is correct and not tampered with.
+</Info>
+
+```csharp Example
+// persist the player information using TheymesSdk.SetPlayer()
+TheymesSdk.SetPlayer(
+  new TheymesPlayer
+  {
+      id = "358912389",
+      name = "John Doe",
+      email = "john.doe@example.com",
+      tier = 2
+  }
+);
+
+// persist the signed player token using TheymesSdk.SetSignedMetadataToken()
+TheymesSdk.SetSignedMetadataToken(tokenFromBackend);
+```
+
+If you use Player Verification with expiring tokens, subscribe to `TheymesSdk.onSignedMetadataTokenExpirationUpdated`. It is called once a minute with the remaining expiration time in seconds, and may be `0` or negative if the current token is already expired. Your game decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.
+
+All player fields are optional, however it is highly recommended to set at least the `id` field, otherwise the player will be considered as an anonymous player. See our [Player Metadata](/developers/player-metadata/player-metadata#metadata-structure) documentation for more information about the player fields.
+
+## Tags
+
+Tags are used to categorize the support tickets. You can specify any tags that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Tags that are not configured for your game will be ignored.
+
+```csharp Example
+// add and persist a new tag
+TheymesSdk.AddTag("banned_player");
+// add and persist multiple tags
+TheymesSdk.AddTags(new List<string> { "banned_player", "cheater_report" });
+
+// open the help center with the tags, but don't persist them
+TheymesSdk.OpenSupport(
+    new TheymesConfig
+    {
+        tags = new List<string> { "banned_player", "cheater_report" }
+    }
+);
+```
+
+There are more functions to manage tags. See the [API Reference](/developers/sdk/unity/api) for more information.
+
+## Fields
+
+Fields are used to pass additional information about the player to the help center. You can specify any fields that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Fields that are not configured for your game will be ignored.
+
+```csharp Example
+// add and persist a new field
+TheymesSdk.AddField("level", 15);
+// add and persist multiple fields
+TheymesSdk.AddFields(
+    new Dictionary<string, object>
+    {
+        { "level", 15 },
+        { "has_made_purchase", true }
+    }
+);
+
+// open the help center with the fields, but don't persist them
+TheymesSdk.OpenSupport(
+    new TheymesConfig
+    {
+        fields = new Dictionary<string, object>
+        {
+            { "level", 15 },
+            { "has_made_purchase", true }
+        }
+    }
+);
+```
+
+There are more functions to manage fields. See the [API Reference](/developers/sdk/unity/api) for more information.
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages you can add before opening support. They are useful for describing recent game events, such as the player opening a menu, starting a mission, or hitting an error.
+
+```csharp Example
+TheymesSdk.AddBreadcrumb("Player opened inventory");
+TheymesSdk.AddBreadcrumbs(new List<string> { "Crafting started", "Crafting failed: missing_wood" });
+TheymesSdk.OpenSupport();
+TheymesSdk.ClearBreadcrumbs();
+```
+
+The SDK timestamps breadcrumbs automatically and includes them when you call `TheymesSdk.OpenSupport()`, `TheymesSdk.OpenSupportAsync()`, `TheymesSdk.OpenResource()`, or `TheymesSdk.OpenResourceAsync()`. Breadcrumbs are kept in memory only, bounded by SDK settings, and cleared when you call `TheymesSdk.ClearBreadcrumbs()` or `TheymesSdk.Reset()`.
+
+Do not include personal data, secrets, or other sensitive information in breadcrumbs.
+
+## WebGL options
+
+When building for WebGL, you can pass `InitializeOptions.web` to `TheymesSdk.Initialize()` to customize WebGL-specific behavior.
+
+### Canvas selector
+
+If your game has multiple canvases, the SDK needs to know which one to use. By default, the SDK looks for `#unity-canvas`, `#unityCanvas`, or the first `canvas` element. If your game uses a different canvas (for example `#gameCanvas`), pass a custom selector:
+
+```csharp Example
+TheymesSdk.Initialize("<token>", "<domain>", new InitializeOptions
+{
+    web = new InitializeWebOptions
+    {
+        canvasSelector = "#gameCanvas"
+    }
+});
+```
+
+### Nonce (Content Security Policy)
+
+If you use [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) (CSP) with a nonce for inline scripts and styles, pass the same nonce to the SDK so it can inject it into its inline content:
+
+```csharp Example
+TheymesSdk.Initialize("<token>", "<domain>", new InitializeOptions
+{
+    web = new InitializeWebOptions
+    {
+        nonce = "your-csp-nonce"
+    }
+});
+```
+
+Generate a random nonce when the page is rendered and use it in both your CSP header (e.g. `'nonce-{RANDOM}'`) and the SDK initialization. See the [Web SDK Content Security Policy guide](/developers/sdk/web/content-security-policy) for more details.
+
+## Android options
+
+When building for Android, you can pass `InitializeOptions.android` to `TheymesSdk.Initialize()` to customize Android-specific behavior. These options are ignored on iOS and WebGL.
+
+### Orientation
+
+By default, the support view is locked to portrait on phones and uses the system default on large screens (tablets). You can override this by passing an `Orientation` constant:
+
+```csharp Example
+TheymesSdk.Initialize("<token>", "<domain>", new InitializeOptions
+{
+    android = new InitializeAndroidOptions
+    {
+        orientation = Orientation.Landscape
+    }
+});
+```
+
+Available `Orientation` constants:
+
+| Constant                  | Description                         |
+| ------------------------- | ----------------------------------- |
+| `Orientation.Unspecified` | No preference — the system chooses. |
+| `Orientation.Landscape`   | Lock to landscape.                  |
+| `Orientation.Portrait`    | Lock to portrait.                   |
+
+If you want to use other orientations on Android, you can also pass the corresponding integer from the [ActivityInfo](https://developer.android.com/reference/android/content/pm/ActivityInfo) class.

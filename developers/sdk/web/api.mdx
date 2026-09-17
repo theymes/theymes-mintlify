@@ -1,0 +1,454 @@
+---
+title: "API Reference"
+description: "JavaScript SDK methods for initializing Theymes, opening support, and configuring the player."
+---
+
+<Info>
+**Important**
+
+Before you can use any other functions of the SDK, you must initialize it by calling the `initialize()` method.
+</Info>
+
+## Initialization
+
+### initialize
+
+```typescript
+type InitializeOptions = InitializeGameOptions | InitializeWidgetOptions;
+
+initialize(token: string, domain: string, options: InitializeOptions): Promise<void>
+```
+
+The `initialize()` method initializes the SDK with the given token and domain. Additionally, you need to pass an options argument and tell whether you want to use the SDK in `game` or `widget` mode.
+
+If you are running the SDK in-game, use the `game` mode and if you are running it on your website, use the `widget` mode.
+
+`InitializeGameOptions`
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `mode` | `'game'` | Yes | - | Mode must be `'game'`. See the `InitializeWidgetOptions` below to see options for `'widget'` mode |
+| `element` | Element |  | - | Optional DOM element to render the widget on top of, otherwise full document is used |
+| `language` | `string` |  | `-` | Default [language code](/developers/sdk/web/configuring#language) (e.g., `"en"`, `"fr"`), you can use [setLanguage](/developers/sdk/web/api#setlanguage) to override the default. |
+| `nonce` | `string` |  | `-` | The nonce property allows you to specify a CSP nonce that will be applied to inline script tags injected by the SDK, enabling compatibility with strict Content Security Policies. |
+| `apiDomain` | `string` |  | - | Override the API domain used by the SDK. |
+
+
+`InitializeWidgetOptions`
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `mode` | `'widget'` | Yes | – | Mode must be `'widget'` |
+| `position` | `'top-left'` `'top-right'` `'bottom-left'` `'bottom-right'` |  | `'bottom-right'` | Position of widget on screen |
+| `x` | `number` |  | `20` | Horizontal offset in pixels |
+| `y` | `number` |  | `20` | Vertical offset in pixels |
+| `button` | `boolean` |  | `false` | Whether to show a floating widget button. If false widget has to be opened manually |
+| `buttonAction` | `'support'` `'assistant'` |  | `'support'` | Which page the widget button opens. |
+| `language` | `string` |  | `-` | Default [language code](/developers/sdk/web/configuring#language) (e.g., `"en"`, `"fr"`), you can use [setLanguage](/developers/sdk/web/api#setlanguage) to override the default. |
+| `nonce` | `string` |  | `-` | The nonce property allows you to specify a CSP nonce that will be applied to inline script tags injected by the SDK, enabling compatibility with strict Content Security Policies. |
+| `apiDomain` | `string` |  | - | Override the API domain used by the SDK. |
+
+
+## Opening and closing
+
+### openSupport
+
+```typescript
+openSupport(config?: TheymesConfig): void
+```
+
+The `openSupport()` method opens the help center.
+
+`TheymesConfig` can optionally be used to customize the help center. See [Configuring the SDK](/developers/sdk/web/configuring) for more information.
+
+### openResource
+
+```typescript
+openResource(resource: string, config?: TheymesConfig): void
+```
+
+Opens a specific resource from Theymes. This can be an article such as a game guide or patch notes, or a collector to gather feedback or bug reports from players. The player is returned to the game after interacting with the resource.
+
+You can get the value for `resource` argument from Theymes application, for example `openResource("crafting-guide")`.
+
+`TheymesConfig` can optionally be used to customize the resource. See [Configuring the SDK](/developers/sdk/web/configuring) for more information.
+
+### openAssistant
+
+```typescript
+openAssistant(config?: TheymesConfig): void
+```
+
+Opens the assistant view without other features of the help center.
+
+`TheymesConfig` can optionally be used to customize the resource. See [Configuring the SDK](/developers/sdk/web/configuring) for more information.
+
+### close
+
+```typescript
+close(): void
+```
+
+Can be used to close the help center or any other resource that is opened with `openResource()`. Normally you don't need to call this method, as the player will see a close button in the SDK UI, but if you need to close the resource programmatically, you can use this method.
+
+## Notifications
+
+<Info>
+Notifications can be shown to user when there's a new message in their open tickets. Typically you would call `enableNotifications()` when transitioning to game menus or other screens where the player is not actively playing, and `disableNotifications()` when transitioning to gameplay.
+
+Notifications are disabled by default and widget mode does not support notifications.
+</Info>
+
+### enableNotifications
+
+```typescript
+enableNotifications(): void
+```
+
+Enables in-game notifications to be shown to the player.
+
+### disableNotifications
+
+```typescript
+disableNotifications(): void
+```
+
+Disables in-game notifications to be shown to the player.
+
+## Config
+
+### getLanguage
+
+```typescript
+getLanguage(): string | null
+```
+
+Returns the currently set language, or `null` if no language is set.
+
+### setLanguage
+
+```typescript
+setLanguage(language: string): void
+```
+
+Sets the language in which the help center will be displayed.
+
+### getPlayer
+
+```typescript
+getPlayer(): TheymesPlayer | null
+```
+
+Returns the currently set player information, or `null` if no player information is set. See [Configuring the SDK](/developers/sdk/web/configuring#player) for more information about the TheymesPlayer object.
+
+### setPlayer
+
+```typescript
+setPlayer(player: TheymesPlayer): void
+```
+
+Sets the player information. See [Configuring the SDK](/developers/sdk/web/configuring#player) for more information.
+
+### getSignedMetadataToken
+
+```csharp
+getSignedMetadataToken()
+```
+
+Returns the currently set signed metadata token. See [Player Verification](/developers/player-metadata/player-verification) for more information.
+
+### setSignedMetadataToken
+
+```csharp
+setSignedMetadataToken(): string
+```
+
+Sets the player information. See [Configuring the SDK](/developers/sdk/web/configuring#player) for more information.
+
+## Tags
+
+Tags can be used to send additional information to Theymes. The tag must be configured in the Theymes application first or otherwise it will be ignored.
+
+### getTags
+
+```typescript
+getTags(): readonly string[]
+```
+
+Returns the currently set tags.
+
+### setTags
+
+```csharp
+setTags(tags: readonly string[]): void
+```
+
+Overwrites the currently set tags with the new list of tags.
+
+### addTag
+
+```typescript
+addTag(tag: string): void
+```
+
+Appends a new tag to the currently set tags.
+
+### addTags
+
+```typescript
+addTags(tags: readonly string[]): void
+```
+
+Appends new tags to the currently set tags.
+
+### removeTag
+
+```typescript
+removeTag(tag: string): void
+```
+
+Removes a tag from the currently set tags.
+
+### removeTags
+
+```typescript
+removeTags(tags: readonly string[]): void
+```
+
+Removes tags from the currently set tags.
+
+### removeAllTags
+
+```typescript
+removeAllTags(): void
+```
+
+Removes all currently set tags.
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages that are timestamped automatically and sent when opening support or a resource. They are kept in memory only and are cleared by `clearBreadcrumbs()` and `reset()`.
+
+### addBreadcrumb
+
+```typescript
+addBreadcrumb(breadcrumb: string): void
+```
+
+Appends a breadcrumb to the current breadcrumb list.
+
+### addBreadcrumbs
+
+```typescript
+addBreadcrumbs(breadcrumbs: readonly string[]): void
+```
+
+Appends multiple breadcrumbs to the current breadcrumb list.
+
+### clearBreadcrumbs
+
+```typescript
+clearBreadcrumbs(): void
+```
+
+Removes all currently set breadcrumbs.
+
+## Fields
+
+Fields are a set of key-value pairs that can be used to send additional information to Theymes. The field must be configured in the Theymes application first or otherwise it will be ignored.
+
+The value type for the fields is `object`, but accepted values are booleans, strings, numbers and lists of strings. The type must match the type configured in Theymes or it will be ignored.
+
+```typescript
+type FieldValue = string | readonly string[] | number | boolean;
+```
+
+### getFields
+
+```typescript
+getFields(): Record<string, FieldValue>
+```
+
+Returns the currently set fields.
+
+### setFields
+
+```typescript
+setFields(fields: Record<string, FieldValue>): void
+```
+
+Overwrites the currently set fields with the new list of fields.
+
+### addField
+
+```typescript
+addField(field: string, fieldValue: FieldValue): void
+```
+
+Appends a new field to the currently set fields.
+
+### addFields
+
+```typescript
+addFields(fields: Record<string, FieldValue>): void
+```
+
+Appends new fields to the currently set fields.
+
+### removeField
+
+```typescript
+removeField(fieldKey: string): void
+```
+
+Removes a field from the currently set fields.
+
+### removeFields
+
+```typescript
+removeFields(fieldKeys: readonly string[]): void
+```
+
+Removes fields from the currently set fields.
+
+### removeAllFields
+
+```typescript
+removeAllFields(): void
+```
+
+Removes all currently set fields.
+
+## Privacy
+
+### isYoungPlayer
+
+```typescript
+isYoungPlayer(): boolean
+```
+
+Returns `true` if the player is set as a young player, otherwise `false`.
+
+### setYoungPlayer
+
+```typescript
+setYoungPlayer(youngPlayer: boolean): void
+```
+
+Sets whether the player is a young player.
+
+<Info>
+Setting the player as a young player will also enable the privacy mode, you do not need to call `setPrivacyMode(true)` separately. Additionally support agents will see that they are talking to a young player and can handle the conversation accordingly.
+</Info>
+
+### isPrivacyMode
+
+```typescript
+isPrivacyMode(): boolean
+```
+
+Returns `true` if the privacy mode is enabled, otherwise `false`.
+
+### setPrivacyMode
+
+```typescript
+setPrivacyMode(privacyMode: boolean): void
+```
+
+Sets whether the privacy mode is enabled.
+
+## Other
+
+```typescript
+isSupported(): boolean
+```
+
+Returns `true` if the help center is supported on the current platform, otherwise `false`.
+
+### getSdkVersion
+
+```typescript
+getSdkVersion(): string
+```
+
+Returns the version of the SDK.
+
+### reset
+
+```typescript
+reset(): void
+```
+
+Resets the SDK to its initial state. This can be useful if you have a logout flow and you want to clear all the player, fields, tags and breadcrumbs state.
+
+### getUnreadMessageCount
+
+```typescript
+getUnreadMessageCount(): number
+```
+
+Returns the number of unread messages. You can use this to show a badge or indicator in your UI.
+
+### getUnansweredMessageCount
+
+```typescript
+getUnansweredMessageCount(): number
+```
+
+Returns the number of unanswered messages. You can use this to show a badge or indicator in your UI.
+
+### iosSetKeyboardHeight
+
+```typescript
+iosSetKeyboardHeight(height: number): void
+```
+
+Signal Theymes SDK that iOS keyboard is now visible or hidden with the given height (`0` for hidden). Theymes SDK will re-layout its view if present to make sure that the keyboard is not blocking any text inputs users are writing to.
+
+<Info>
+You generally never need to use this. This is only needed in special situations when embedding Theymes SDK inside an app wrapper such as Cordova and if you are overriding the default behavior of iOS keyboard to allow hiding your web page content under the keyboard.
+</Info>
+
+## Events
+
+There are five different events Theymes currently supports. You can add and remove event listeners by calling `addEventListener` and `removeEventListener` with a listener function for each event type.
+
+You can use the events to update your game's or web page's UI (e.g. to show a badge or indicator for unread or unanswered messages).
+
+```typescript
+type OpenEventListener = () => void;
+type CloseEventListener = () => void;
+type UnreadMessageCountEventListener = (count: number) => void;
+type UnansweredMessageCountEventListener = (count: number) => void;
+type SignedMetadataTokenExpirationEventListener = (expiresInSeconds: number) => void;
+```
+
+### addEventListener
+
+```typescript
+interface AddEventListener {
+  (type: 'open', listener: OpenEventListener): void;
+  (type: 'close', listener: CloseEventListener): void;
+  (type: 'unreadMessageCountUpdate', listener: UnreadMessageCountEventListener): void;
+  (type: 'unansweredMessageCountUpdate', listener: UnansweredMessageCountEventListener): void;
+  (type: 'signedMetadataTokenExpirationUpdate', listener: SignedMetadataTokenExpirationEventListener): void;
+}
+```
+
+Adds a listener for an event type.
+
+The `signedMetadataTokenExpirationUpdate` event is called only when a signed metadata token is set. It is called immediately when the page comes to the foreground and then once a minute while the page stays in the foreground. The listener receives the remaining expiration time in seconds. If the token is already expired, the value is `0` or negative. Your game or page decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.
+
+### removeEventListener
+
+```typescript
+interface RemoveEventListener {
+  (type: 'open', listener: OpenEventListener): void;
+  (type: 'close', listener: CloseEventListener): void;
+  (type: 'unreadMessageCountUpdate', listener: UnreadMessageCountEventListener): void;
+  (type: 'unansweredMessageCountUpdate', listener: UnansweredMessageCountEventListener): void;
+  (type: 'signedMetadataTokenExpirationUpdate', listener: SignedMetadataTokenExpirationEventListener): void;
+}
+```
+
+Removes an attached listener. **Note**, the callback you pass to `removeEventListener` must be the same function reference which was passed to `addEventListener`.

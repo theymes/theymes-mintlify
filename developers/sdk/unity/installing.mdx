@@ -1,0 +1,100 @@
+---
+title: "Installing the SDK"
+description: "Installing the Theymes Unity SDK is a straightforward process. You can either install the SDK from Git or from a tarball."
+---
+
+Installing the Theymes Unity SDK is a straightforward process. You can either install the SDK from Git or from a tarball.
+
+Theymes Unity SDK is distributed as an UPM package and it can be installed either using Git URL or from a tarball. To install the package follow these steps:
+
+<Tabs>
+    <Tab title="Open UPM">
+    For instructions on how to use OpenUPM refer to the OpenUPM documentation. You can either configure OpenUPM [directly in the Unity Editor](https://openupm.com/docs/getting-started.html#setup-the-scoped-registry) or use their [CLI in terminal](https://openupm.com/docs/getting-started-cli.html). The CLI is the easiest method as it automatically sets up the scoped registry automatically and it can automatically detect the latest version.
+
+    The Theymes SDK OpenUPM package can be found here: https://openupm.com/packages/com.theymes.sdk/
+
+    To install the Theymes SDK with the CLI, simply use this command in your terminal while in the project root:
+
+    ```sh
+    openupm add com.theymes.sdk
+    ```
+
+    If you want to install without the CLI, follow the instructions of the OpenUPM documentation.
+
+    
+</Tab>
+
+
+    <Tab title="Git URL">
+    You can see the available releases in the [Theymes Unity SDK Github repository](https://github.com/theymes/theymes-unity-sdk/releases).
+
+    1. Open the Package Manager window (Window > Package Manager).
+    2. Click the `+` button in the top left corner and select `Add package from git URL...`.
+    3. Enter the Git URL with the desired release as the URL, eg: `https://github.com/theymes/theymes-unity-sdk.git#v1.1.5`
+    4. Click `Add`.
+
+    For more information about installing an UPM package from Git URL, see the official [Unity documentation](https://docs.unity3d.com/Manual/upm-ui-giturl.html).
+
+    
+</Tab>
+
+    <Tab title="Tarball">
+    1. Download the desired SDK version from https://github.com/theymes/theymes-unity-sdk/releases
+    2. Put the SDK tarball (for example `com.theymes.sdk-1.1.5.tgz`) in your project's `Packages` directory.
+    3. Open the Package Manager window (Window > Package Manager).
+    4. Click the `+` button in the top left corner and select `Add package from tarball...`.
+    5. Select the tarball you downloaded.
+    6. Click `Open`.
+
+    For more information about installing an UPM package from tarball, see the official [Unity documentation](https://docs.unity3d.com/Manual/upm-ui-tarball.html).
+
+    You should commit the tarball to your version control repository so it is available for other developers in your team.
+    
+</Tab>
+
+</Tabs>
+
+## Initializing the SDK
+
+To initialize the SDK you must call `TheymesSdk.Initialize()` method in `Awake()` of your first scene. Create a new file `TheymesSdkInitializer.cs` and add the following code to it:
+
+```csharp TheymesSdkInitializer.cs
+using UnityEngine;
+using Theymes;
+
+public class TheymesSdkInitializer : MonoBehaviour
+{
+    void Awake()
+    {
+        TheymesSdk.Initialize("<token>", "<domain>");
+    }
+}
+```
+
+Replace `<token>` with your game token and `<domain>` with your game domain. You can find these from your game settings in the Theymes application.
+
+Next add a new GameObject to your first scene by clicking `GameObject > Create Empty`. Name the game object as `TheymesSdkInitializer` and select it from the Hierarchy panel. Next attach the `TheymesSdkInitializer.cs` script to the game object by dragging it from the Project panel to the GameObject in the Inspector panel.
+
+You are now ready to use the SDK!
+
+<Tip>
+If you already have another script to do initialization in your scene, you can add the SDK initialization code there instead.
+</Tip>
+
+## Next steps
+
+To verify that everything is working correctly, you can try to open the help center by calling `TheymesSdk.OpenSupport()` method. If you have initialized the SDK correctly with valid token and domain, the help center should open. On Windows, macOS, Linux, and in the Unity Editor, the SDK opens the public support site in the system browser.
+
+```csharp Example
+using UnityEngine;
+using Theymes;
+
+public class SupportButtonAction : MonoBehaviour
+{
+    public void OnButtonClick()
+    {
+        TheymesSdk.OpenSupport();
+    }
+}
+
+```

@@ -1,0 +1,67 @@
+---
+title: "Installing the SDK"
+description: "Add the Theymes SDK to your iOS project with CocoaPods. Choose the SDK version from the Theymes iOS SDK releases page."
+---
+
+Add the Theymes SDK to your iOS project with CocoaPods. Choose the SDK version from the [Theymes iOS SDK releases page](https://github.com/theymes/theymes-ios-sdk/releases).
+
+Add the SDK to your app's `Podfile`:
+
+```ruby
+pod 'TheymesSdk',
+    :podspec => 'https://raw.githubusercontent.com/theymes/theymes-ios-sdk/vX.Y.Z/TheymesSdk.podspec'
+```
+
+Replace `vX.Y.Z` with the release version you want to install, then run:
+
+```sh
+pod install
+```
+
+## Initializing the SDK
+
+Initialize the SDK with your game token and domain. You can find these in your game settings in the Theymes application.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.initialize(token: "<token>", domain: "<domain>")
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes initializeWithToken:@"<token>" domain:@"<domain>"];
+```
+
+  
+</Tab>
+</Tabs>
+
+Replace `<token>` and `<domain>` with your actual values. Call initialization early in your app lifecycle (e.g. in `AppDelegate` or your root scene).
+
+For advanced setups (e.g. custom API domain), you can pass an optional options dictionary as the third parameter with an `apiDomain` key. See the [API Reference](/developers/sdk/ios/api#initialize) for details.
+
+## Next steps
+
+To verify that everything is working, open the help center:
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.openSupport()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes openSupport];
+```
+
+  
+</Tab>
+</Tabs>
+
+If the SDK is initialized with a valid token and domain, the help center should open. See [Configuring the SDK](/developers/sdk/ios/configuring) and the [API Reference](/developers/sdk/ios/api) for more options.

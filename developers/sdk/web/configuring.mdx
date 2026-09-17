@@ -1,0 +1,120 @@
+---
+title: "Configuring the SDK"
+description: "There are many options to customize the SDK to your needs. You can either pass a config object to methods like openSupport(), or set configuration via the SDK methods (e.g. setL..."
+---
+
+There are many options to customize the SDK to your needs. You can either pass a config object to methods like `openSupport()`, or set configuration via the SDK methods (e.g. `setLanguage()`, `setPlayer()`), in which case the options are persisted and passed to the help center when opened later.
+
+You can even use both methods together. When Theymes opens the help center it will merge the configuration options from both.
+
+<Tip>
+**Prefer persisting configuration options**
+
+Persisting the options such as fields and tags is preferred, as it ensures that the help center will always open with the correct configuration and allows other SDK features to use them.
+</Tip>
+
+## Language
+
+[ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language code in which the help center should be displayed. If not set, we will prefer the language of the device the game is running on, and if that is not available, we will default to English. **Note, some languages do not support two-letter ISO-639-1 code**, so for those languages you need to give the three-letter [ISO-639-2 code](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes).
+
+You can specify any languages that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values.
+
+```javascript Example
+import { setLanguage, openSupport } from '@theymes/sdk';
+
+// persist the language using setLanguage()
+setLanguage('fr');
+
+// open the help center with the language, but don't persist it
+openSupport({ language: 'fr' });
+```
+
+## Player
+
+There are two ways to set the player information. You can either set it using the `setPlayer()` method, or by using our [Player Verification](/developers/player-metadata/player-verification) feature. With the Player Verification feature you get a signed token from your backend which you can pass to the SDK with `setSignedMetadataToken()`.
+
+<Info>
+**Player Verification**
+
+The Player Verification allows you to verify the identity of your players. For example if someone opens a support ticket, you can be sure that the player information and optionally other metadata is correct and not tampered with.
+</Info>
+
+```javascript Example
+import { setPlayer, setSignedMetadataToken } from '@theymes/sdk';
+
+// persist the player information using setPlayer()
+setPlayer({
+  id: '358912389',
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  tier: 2,
+});
+
+// persist the signed player token using setSignedMetadataToken()
+setSignedMetadataToken(tokenFromBackend);
+```
+
+If you use Player Verification with expiring tokens, listen for the `signedMetadataTokenExpirationUpdate` event. It is called once a minute with the remaining expiration time in seconds, and may be `0` or negative if the current token is already expired. Your game or page decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.
+
+All player fields are optional, however it is highly recommended to set at least the `id` field, otherwise the player will be considered as an anonymous player. See our [Player Metadata](/developers/player-metadata/player-metadata#metadata-structure) documentation for more information about the player fields.
+
+## Tags
+
+Tags are used to categorize the support tickets. You can specify any tags that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Tags that are not configured for your game will be ignored.
+
+```javascript Example
+import { addTag, addTags, openSupport } from '@theymes/sdk';
+
+// add and persist a new tag
+addTag('banned_player');
+// add and persist multiple tags
+addTags(['banned_player', 'cheater_report']);
+
+// open the help center with the tags, but don't persist them
+openSupport({ tags: ['banned_player', 'cheater_report'] });
+```
+
+There are more functions to manage tags. See the [API Reference](/developers/sdk/web/api) for more information.
+
+## Fields
+
+Fields are used to pass additional information about the player to the help center. You can specify any fields that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Fields that are not configured for your game will be ignored.
+
+```javascript Example
+import { addField, addFields, openSupport } from '@theymes/sdk';
+
+// add and persist a new field
+addField('level', 15);
+// add and persist multiple fields
+addFields({
+  level: 15,
+  has_made_purchase: true,
+});
+
+// open the help center with the fields, but don't persist them
+openSupport({
+  fields: {
+    level: 15,
+    has_made_purchase: true,
+  },
+});
+```
+
+There are more functions to manage fields. See the [API Reference](/developers/sdk/web/api) for more information.
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages you can add before opening support. They are useful for describing recent game events, such as the player opening a menu, starting a mission, or hitting an error.
+
+```typescript Example
+import { addBreadcrumb, addBreadcrumbs, clearBreadcrumbs, openSupport } from '@theymes/sdk';
+
+addBreadcrumb('Player opened inventory');
+addBreadcrumbs(['Crafting started', 'Crafting failed: missing_wood']);
+openSupport();
+clearBreadcrumbs();
+```
+
+The SDK timestamps breadcrumbs automatically and includes them when you call `openSupport()` or `openResource()`. Breadcrumbs are not sent with retention or event tracking calls.
+
+Breadcrumbs are kept in memory only, bounded by SDK settings, and cleared when you call `clearBreadcrumbs()` or `reset()`. Do not include personal data, secrets, or other sensitive information in breadcrumbs.

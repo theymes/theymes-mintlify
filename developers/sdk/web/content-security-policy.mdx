@@ -1,0 +1,67 @@
+---
+title: "Content Security Policy (CSP)"
+description: "If you use Content Security Policy in your game or on your web page, this guide helps you to make sure Theymes SDK works with your policy."
+---
+
+If you use [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) in your game or on your web page, this guide helps you to make sure Theymes SDK works with your policy.
+
+## Scripts
+
+If your CSP includes `script-src` or `default-src` directive, you must make sure that:
+
+- The policy allows the page to load Theymes SDK script from `assets.theymes.com`. If you installed the SDK from NPM, this is not necesary.
+- The policy allows Theymes SDK to execute its inline scripts. You can either do this by specifying `'unsafe-inline'` keyword, or using a [nonce](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/nonce).
+
+<Warning>
+You should avoid using 'unsafe-inline' in production, because it defeats much of the purpose of having a CSP. Using nonce is much better alternative.
+</Warning>
+
+To use a nonce, you should generate a random string when the page is rendered, and then specify it in your CSP with `'nonce-{RANDOM}'` keyword in your directive.
+
+When calling [`theymes.initialize()`](/developers/sdk/web/api#initialize) you should pass the nonce in the options argument. The SDK will then inject the nonce to all inline script tags.
+
+Here's an example CSP that includes a valid script-src policy:
+
+```
+Content-Security-Policy: script-src 'self' https://assets.theymes.com 'nonce-980b3b7c'
+```
+
+## Connect & frames
+
+If your CSP includes `frame-src`, `connect-src` or `default-src` directives, you must make sure that the policy allows your Theymes domain, eg. `<company>.theymes.com`.
+
+Here's an example CSP that includes a valid frame-src and connect-src policy:
+
+```
+Content-Security-Policy: frame-src example.theymes.com; connect-src example.theymes.com
+```
+
+## Stylesheets
+
+If your CSP includes `style-src` or `default-src` directive, you must make sure that the policy allows inline stylesheets from Theymes SDK. You can do this either by using `'unsafe-inline'` keyword, or using a [nonce](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/nonce).
+
+See the [scripts section](#scripts) for information about using a nonce.
+
+<Info>
+Theymes always uses the same nonce passed to `theymes.initialize()` for both inline scripts and stylesheets.
+</Info>
+
+Here's an example CSP that includes a valid style-src policy:
+
+```
+Content-Security-Policy: style-src 'self' 'nonce-980b3b7c'
+```
+
+## Custom fonts
+
+<Tip>
+The default branding for games in Theymes uses custom google fonts. If you want to use the default fonts, you should enable google fonts. The google fonts domain is `https://fonts.gstatic.com`.
+</Tip>
+
+If you use custom fonts, and you use either `font-src` or `default-src`, you must make sure that the policy allows those fonts to be loaded.
+
+Here is an example CSP that includes a valid font-src policy for google fonts:
+
+```
+Content-Security-Policy: font-src https://fonts.gstatic.com
+```

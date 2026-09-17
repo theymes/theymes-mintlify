@@ -1,0 +1,104 @@
+---
+title: "Player Verification"
+description: "We recommend that you setup Player Verification for your game from the start. This way you can block unverified players from contacting support right away, without having to wor..."
+---
+
+<Tip>
+We recommend that you setup Player Verification for your game from the start. This way you can block unverified players from contacting support right away, without having to worry about old game versions that were published before Player Verification was implemented.
+</Tip>
+
+Theymes allows you to sign your [player metadata](/developers/player-metadata/player-metadata). When we receive signed metadata, we will verify the signature and ensure that the metadata has not been tampered with. This provides strong guarantee that your players are who they say they are.
+
+Player verification has many benefits:
+
+- You can trust your players are who they say they are.
+- You can block unverified players from contacting support.
+- Allows players to access their chats across different devices and channels.
+- Allows support agents to see related conversations from the player across devices and channels.
+
+## Blocking unverified player metadata
+
+By default your game is configured to allow both verified and unverified player metadata. This means that if you don't sign your player metadata, it will still be accepted.
+
+When you setup Player Verification, we recommend that you block unverified players from contacting support. This way your support agents can be sure that the player is identified and verified and they don't need to spend time verifying the player manually.
+
+<Info>
+**Unverified vs Anonymous players**
+
+Blocking unverified players does not affect anonymous players' ability to use support. Anonymous players are players that do not have an `player.id` field set in the [player metadata](/developers/player-metadata/player-metadata#metadata-structure). Unverified players are players that have an `player.id` field set, but their metadata is not signed.
+</Info>
+
+## How does player verification work
+
+Theymes uses asymmetric signing of [JSON Web Tokens](https://jwt.io/) for player verification. To sign your metadata, you use a private key accessible only to you. The metadata is signed on your backend, so the private key is never exposed to users.
+
+<Info>
+**Security is important to us**
+
+We do not support symmetric keys for signing the JWTs. By using asymmetric keys we ensure that nobody can forge your player metadata, not even us.
+</Info>
+
+When we receive the signed metadata, we will verify the signature to ensure the metadata has not been tampered with. We use JSON Web Key Sets (JWKS) to verify the signature. Since JWKS allows multiple keys in the set, it allows you to rotate your keys, if needed, without affecting your players' ability to contact support.
+
+## How to sign metadata
+
+We recommend using a JWT library for signing your player metadata. Most popular programming languages have libraries for signing JWTs. You need to sign the JWT with your private key.
+
+### JWT requirements
+
+- The JWT must be signed with asymmetric private key. The private key must have a key length of at least 2048 bits.
+- The JWT header must contain the `kid` field, which is the key ID of the private key used to sign the JWT. We use this to find the correct public key in the JWKS.
+- The JWT header must contain the `alg` field, which is the algorithm used to sign the JWT. We support RSA algorithms: `RS256`, `RS384` & `RS512`.
+- The JWT must contain the expiration `exp` claim in the JWT payload. The token needs to be valid for the duration of the player using the support.
+- The [player metadata](/developers/player-metadata/player-metadata#metadata-structure) must be in the `metadata` claim of the JWT payload.
+
+<Tip>
+Although not required, we recommend that you include the `iss` (issuer) and `aud` (audience) claims in the JWT payload. This way you can easily identify the purpose of the JWT token. You can use `https://<company>.theymes.com` as the audience.
+</Tip>
+
+### When to sign player metadata
+
+Depending on the channel where you are integrating Theymes (mobile game, web widget, etc.) you probably want to sign the metadata at different times. For games, you generally sign the metadata when the player authenticates, for example when the game starts or when the player logs in. Your player authentication backend signs a player metadata JWT and sends it to the game. The game will then provide Theymes SDK with the signed metadata.
+
+For web channel you'd generally sign the metadata when the player opens your site. Once the browser receives the signed metadata from your backend, you will use it to initialize Theymes Web Widget.
+
+<Info>
+These are just some examples when you can sign the metadata, but you have complete control over when and where to sign the metadata. You could also sign the metadata just before the player opens the support in-game, or before the player opens the web widget.
+</Info>
+
+<Warning>
+**Important**
+
+The JWT needs to be valid for the duration of the player using the support channel. If you create the token when the user starts your game, and you don't refresh it while the game is running, you should set the expiration to be long enough to cover the expected duration before the player starts the game again and a new token is issued.
+</Warning>
+
+## How to setup verification on Theymes
+
+Theymes uses JWKS to verify the signature of the JWT. There are two ways to provide the JWKS to Theymes:
+
+1. You can configure a JWKS URL in your game settings. Theymes will fetch the JWKS from the URL and use it to verify the signature of the JWT.
+2. You can enter the JWKS directly in the game settings.
+
+Fetching the JWKS from the URL is the recommended way if you have a JWKS endpoint setup for your company. This way you can rotate your keys without having to update the game settings in Theymes.
+
+If you don't have a JWKS endpoint setup, you can enter the JWKS directly in the game settings to get started quikcly. You can easily switch to fetching the JWKS from an URL later at any point.
+
+<Info>
+See our [Player Verification Guide](/developers/player-metadata/player-verification-guide) for a step-by-step guide on how to create a private/public key pair and setup JWKS verification in your game settings.
+</Info>
+
+## Mixing signed and unsigned metadata
+
+You can send both signed and unsigned player metadata to Theymes at the same time. You might have some data about players that you only have in your game but not in your backend that can help provide better support.
+
+This data is often things like player progress, the last level they completed, live ops event information, etc. If the data is not crucial to safely identify the player, it is ok to send the data as unsigned. You can still use signed player metadata for the crucial data.
+
+<Info>
+If a field is present in both signed and unsigned metadata, the signed metadata will take precedence.
+</Info>
+
+<Warning>
+**Important**
+
+Even though you can mix signed and unsigned player metadata, we will always treat the [player object](/developers/player-metadata/player-metadata#metadata-structure) as one atomic value. If your signed metadata contains a player object, we will ignore the player object in the unsigned metadata.
+</Warning>
