@@ -1,0 +1,145 @@
+---
+title: "Liquid Variables"
+description: "Automations use Liquid variables to insert values from triggers and previous actions into text fields. You can use variables in places such as messages, private notes, Slack mes..."
+---
+
+Automations use Liquid variables to insert values from triggers and previous actions into text fields. You can use variables in places such as messages, private notes, Slack messages, HTTP URLs, HTTP headers, HTTP body templates, and Set variables values.
+
+## Basic syntax
+
+Wrap a variable in double curly braces:
+
+```liquid
+{{ trigger.ticketId }}
+```
+
+Variables are grouped by node name. If your trigger node is named `trigger`, ticket variables are available under `trigger`:
+
+```liquid
+Ticket: {{ trigger.runningId }}
+Player: {{ trigger.playerId }}
+Language: {{ trigger.language }}
+```
+
+If an HTTP request node is named `lookupPlayer` and creates an output named `segment`, later actions can use:
+
+```liquid
+{{ lookupPlayer.segment }}
+```
+
+If a Set variables node is named `setVariables` and creates a variable named `playerTier`, later actions can use:
+
+```liquid
+{{ setVariables.playerTier }}
+```
+
+## Node names matter
+
+Variable paths use the automation node name. If you rename a node, update any Liquid templates that reference that node.
+
+Use short, descriptive names such as `trigger`, `lookupPlayer`, `setVariables`, `formatSummary`, or `routeByTier`.
+
+## Common ticket variables
+
+Ticket triggers and manual workflows expose ticket-related variables such as:
+
+| Variable        | Description                          |
+| --------------- | ------------------------------------ |
+| `ticketId`      | The ticket ID.                       |
+| `runningId`     | The human-readable ticket number.    |
+| `url`           | A link to the ticket in Theymes.     |
+| `game`          | The App/Game related to the ticket.  |
+| `language`      | The ticket language.                 |
+| `playerId`      | The player ID, when available.       |
+| `playerName`    | The player name, when available.     |
+| `email`         | The player email, when available.    |
+| `playerTier`    | The player tier, when available.     |
+| `channels`      | The ticket channels.                 |
+| `platform`      | The player platform, when available. |
+| `supportSource` | The support source, when available.  |
+| `tags`          | Ticket tags.                         |
+| `fields`        | Ticket custom fields.                |
+| `metadata`      | Player or device metadata.           |
+| `eventHistory`  | Ticket event history.                |
+
+Some trigger types expose extra variables. For example, Player message exposes the latest message and message history, while Ticket events exposes the event that started the automation.
+
+## Common issue variables
+
+Issue raised and Issue resolved triggers expose:
+
+| Variable    | Description                                                 |
+| ----------- | ----------------------------------------------------------- |
+| `issueId`   | The stable issue ID.                                        |
+| `alertId`   | The ID of the specific raised or resolved alert occurrence. |
+| `game`      | The App/Game related to the issue.                          |
+| `title`     | The issue title.                                            |
+| `issueType` | The issue type.                                             |
+| `status`    | `NEW` or `RESOLVED`.                                        |
+
+Some automation runs may not include `alertId`, as it is only being rolled out. Templates should handle cases where this variable is empty.
+
+Ticket created triggers expose the latest ticket state available when the automation runs. This can include updates made after ticket creation by Issue automations or other Ticket created automations. Ticket events and Player message triggers also expose the current ticket details available when the automation runs, such as tags, fields, player tier, and other ticket values. However, their message and event history variables are limited to the state at the time of the triggering message or event.
+
+## Metadata and custom fields
+
+Player metadata and custom fields are objects. You can read nested values with dot notation:
+
+```liquid
+{{ trigger.metadata.sdkVersion }}
+{{ trigger.metadata.osVersion }}
+{{ trigger.fields.accountType }}
+```
+
+Only values that exist on the ticket or player will render. If a value may be missing, write templates that still make sense when the rendered value is empty.
+
+## Workflow inputs
+
+Manual workflows can ask the agent for inputs before running. Inputs are available under `inputs` on the workflow trigger node.
+
+For example, if the trigger is named `trigger` and an input key is `escalationReason`, use:
+
+```liquid
+{{ trigger.inputs.escalationReason }}
+```
+
+Input keys must start with a letter and can contain only letters, numbers, and underscores.
+
+## Switch variables
+
+Switch nodes expose information about the branch they selected:
+
+| Variable              | Description                           |
+| --------------------- | ------------------------------------- |
+| `selectedBranchId`    | The selected branch ID.               |
+| `selectedBranchLabel` | The selected branch label.            |
+| `selectedBranchOrder` | The selected branch priority order.   |
+| `selectedIsFallback`  | Whether the fallback branch was used. |
+
+For example:
+
+```liquid
+Selected route: {{ routeByTier.selectedBranchLabel }}
+```
+
+## Example Slack message
+
+```liquid
+New ticket #{{ trigger.runningId }} from {{ trigger.playerName }}
+
+Tier: {{ trigger.playerTier }}
+Language: {{ trigger.language }}
+URL: {{ trigger.url }}
+```
+
+## Example HTTP JSON body
+
+```json
+{
+  "ticketId": "{{ trigger.ticketId }}",
+  "ticketNumber": "{{ trigger.runningId }}",
+  "playerId": "{{ trigger.playerId }}",
+  "language": "{{ trigger.language }}",
+  "url": "{{ trigger.url }}"
+}
+```

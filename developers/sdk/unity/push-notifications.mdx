@@ -1,0 +1,239 @@
+---
+title: "Push notifications"
+description: "To understand different notifications capabilities of Theymes SDK, please check the Notifications page. This page details how to setup push notifications for iOS and Android in..."
+---
+
+To understand different notifications capabilities of Theymes SDK, please check the [Notifications](/developers/sdk/unity/notifications) page. This page details how to setup push notifications for iOS and Android in Unity.
+
+Theymes supports two different ways of setting up push notifications:
+
+- Firebase Cloud Messaging (FCM). Supports both iOS and Android.
+- Apple Push Notification service (APNs). Supports only iOS.
+
+If you don't already have a push notifications setup, we recommend using FCM for both iOS and Android for simplicity. However if you're already using APNs or have need to target iOS versions earlier than iOS 15, then you need to use APNs for iOS as FCM only works on iOS 15 and newer versions.
+
+## Common setup
+
+This section outlines setup that needs to be done regardless of whether using FCM or APNs.
+
+### Request for permission to show notifications
+
+There are multiple ways of requesting a permission from user to display notifications. In Unity people generally use [Unity Mobile Notifications](https://docs.unity3d.com/Packages/com.unity.mobile.notifications@1.4/manual/index.html) to do so. Unity Mobile Notifications also has the added benefit that if you want to setup push notifications via APNs, it allows you to request the device token that is necessary to setup push notifications via APNs.
+
+If you for some reason don't want to use Unity Mobile Notifications and you already don't have another way of requesting the notification permissions, Theymes provides a convenience API to do so with [`TheymesSdk.RequestNotificationPermission()`](/developers/sdk/unity/api#requestnotificationpermission).
+
+<Tip>
+Theymes SDK does not provide you a way to get a device token for APNs, we recommend using Unity Mobile Notifications if you want to setup push notifications with APNs.
+</Tip>
+
+### Configuring iOS XCode project
+
+Regardless of whether you use FCM or APNs, you need to enable push notifications and remote notifications (under background modes) capabilities in order for push notifications to work on iOS. The easiest way to set these up is by using Unity Mobile Notifications (UMN). When UMN is installed, you can find "Mobile Notifications" under the project settings. Toggle on the **Enable Push Notifications** setting. With this UMN will configure your XCode project with the required capabilities.
+
+<Tip>
+If you want to control when to ask for notification permission from the user, leave the "Request Authorization on App Launch" and "Register for Push Notifications on App Launch" unchecked. This way you can control exactly when to ask for the permission in your game's initialization sequence.
+</Tip>
+
+### Handling notifications when the game is in foreground
+
+As outlined in the [Notifications](/developers/sdk/unity/notifications) page, Theymes only shows text notifications to users when the game is in foreground if notifications are currently enabled with [`TheymesSdk.EnableNotifications()`](/developers/sdk/unity/api#enablenotifications).
+
+Regardless of whether notifications are enabled or disabled, the [in-game notification badges](/developers/sdk/unity/notifications#in-game-notification-badges) are always updated immediately when a push notification is received and the game is in foreground.
+
+### Handling tapped push notifications
+
+When your game is in the background and user receives a push notification, the user can tap on the notification to directly open the support ticket within the game. In order for this to work correctly, you need to add a small piece of code to handle taps when the game comes to foreground. If you don't add this, tapping the notification will open the game, but it will not automatically open the Theymes support overlay.
+
+```csharp
+private void OnApplicationPause(bool isPaused)
+{
+    if (!isPaused) {
+        TheymesSdk.HandlePendingNotificationAction();
+    }
+}
+```
+
+<Info>
+You should not call `TheymesSdk.HandlePendingNotificationAction()` before Theymes SDK has been initialized and the player info has been set as outlined in the [Configuring the SDK](/developers/sdk/unity/configuring#player). When `HandlePendingNotificationAction()` is called, the notification action is only handled if the logged-in player is the same player the notification was targeted for.
+</Info>
+
+## Setting up FCM
+
+First follow the instructions of [Firebase Unity SDK](https://firebase.google.com/docs/cloud-messaging/unity/get-started) to configure your Firebase project for Android and/or iOS and install the Unity FCM SDK.
+
+To configure push notifications for Theymes you need to:
+
+1. Register the FCM device token with Theymes in the game client.
+2. Handle received notifications targeted to Theymes in the game client.
+3. Configure FCM push notifications in the Theymes application.
+
+The first step is done by adding an event listener to FCM's `TokenReceived` event and send the device token to Theymes with [`TheymesSdk.RegisterPushToken()`](/developers/sdk/unity/api#registerpushtoken) in the callback.
+
+The second step is done by adding an event listener to FCM's `MessageReceived` event and pass the message data to [`TheymesSdk.HandleNotification()`](/developers/sdk/unity/api#handleNotification). This will only handle notifications targeted to Theymes, other notifications are ignored.
+
+Here is an example of how to do first two steps. Keep in mind that adding the event listeners will also initialize FCM, which will trigger displaying a notification permission from the user, so you should do this in the appropriate place of your game initialization sequence.
+
+```csharp
+// if you also want to use FCM on iOS, use "#if UNITY_IOS || UNITY_ANDROID" instead
+#if UNITY_ANDROID
+public void Start() {
+    Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task => {
+        var dependencyStatus = task.Result;
+        if (dependencyStatus == Firebase.DependencyStatus.Available) {
+            Firebase.Messaging.FirebaseMessaging.TokenReceived += OnTokenReceived;
+            Firebase.Messaging.FirebaseMessaging.MessageReceived += OnMessageReceived;
+        } else {
+            // handle errors
+        }
+    });
+}
+
+public void OnTokenReceived(object sender, Firebase.Messaging.TokenReceivedEventArgs token) {
+    // register the device with Theymes
+    TheymesSdk.RegisterPushToken(token.Token, PushTokenType.FCM);
+}
+
+public void OnMessageReceived(object sender, Firebase.Messaging.MessageReceivedEventArgs e) {
+    // needed to handle the notification while the game is in foreground
+    TheymesSdk.HandleNotification(e.Message.NotificationOpened, e.Message.Data);
+}
+#endif
+```
+
+Finally to allow Theymes to send push notifications to your users, you need to configure FCM in Theymes application.
+
+1. Select your game from the left navigation.
+2. Click "Settings" from bottom of the game navigation.
+3. Click "Push notifications".
+4. Configure Firebase Cloud Messaging (FCM).
+
+Theymes supports two ways of setting up FCM:
+
+- Generate and upload your service account JSON credentials to Theymes.
+- Use a webhook to your own back-office and forward the push notifications to FCM yourself.
+
+The first way is the easy way, but requires you to share your service account credentials with us. The second way allows you to setup push notifications without sharing the credentials with us, but you need to integrate to FCM APIs yourself. We've made this as easy as possible though.
+
+### Setting up direct integration to APNs
+
+To setup service account JSON you need to either provide us an existing service account JSON or generate a new one in Firebase Console. To create a new key:
+
+1. Open your project in Firebase Console.
+2. From top left, next to "Project Overview", click the cog icon and select "Service accounts".
+3. Click the "Generate new private key" button.
+4. Confirm and generate the new key.
+5. Store the file in a secure location.
+
+<Info>
+In order for Theymes to send push notifications, the service account needs the `cloudmessaging.messages.create` and `firebase.projects.get` permissions. These permissions are granted by roles `roles/firebasemessaging.admin` and `roles/firebase.viewer`.
+</Info>
+
+Upload the service account JSON in the push notifications page in Theymes application and save the changes.
+
+### Setting up integration via webhook
+
+When using a webhook, Theymes still normally collects the device tokens. When we need to send a push notification to a device, we will send a POST request to the URL you define with the exact payload in body that you need to forward to [FCM API](https://firebase.google.com/docs/reference/fcm/rest). It is outside the scope of this documentation how to create the webhook and how to sign the requests to FCM API, please refer to Google's documentation for that.
+
+To setup the webhook in Theymes you need two things:
+
+1. Credentials that Theymes will use to send a request to the webhook URL.
+2. The webhook URL.
+
+You can create credentials by navigating to **Company** > **Credentials** and clicking **Create credential**. When setting up the webhook select the credential that your webhook expects and fill in the URL of the webhook and click **Save**. Theymes will now send a POST request to your webhook when we need to send a push notification via FCM.
+
+## Setting up APNs
+
+To configure APNs push notifications for Theymes you need to:
+
+1. Register the APNs device token with Theymes in the game client.
+2. Configure APNs push notifications in the Theymes application.
+
+### Register the APNs device token
+
+Here is an example of how to get the APNs device token using Unity Mobile Notifications while requesting permissions to display notifications from the user, and then registering the device token with Theymes:
+
+```csharp
+var options = AuthorizationOption.Alert | AuthorizationOption.Badge | AuthorizationOption.Sound;
+using (var req = new AuthorizationRequest(options, true))
+{
+    while (!req.IsFinished) {
+        yield return null;
+    }
+
+    if (req.DeviceToken != null) {
+        TheymesSdk.RegisterPushToken(req.DeviceToken, PushTokenType.APNS);
+    } else {
+        // handle errors
+    }
+}
+```
+
+If you don't use Unity Mobile Notifications, you need to get the device token some other way either in Unity or in the native iOS side. If you do it on the native side, Theymes SDK provides native iOS APIs that you can use to register the device token from both Swift & Objective-C code:
+
+<Tabs>
+  <Tab title="Swift">
+    ```swift
+    Theymes.registerPushToken(token, type: .apns)
+    ```
+  
+</Tab>
+  <Tab title="Objective-C">
+    ```objectivec
+    [Theymes registerPushToken:token type:PushTokenTypeApns];
+    ```
+  
+</Tab>
+</Tabs>
+
+Finally to allow Theymes to send push notifications to your users, you need to configure APNs in Theymes application.
+
+1. Select your game from the left navigation.
+2. Click "Settings" from bottom of the game navigation.
+3. Click "Push notifications".
+4. Configure Apple Push Notification service (APNs).
+
+Theymes supports two ways of setting up APNs:
+
+- Generate and upload a .p8 private key file.
+- Use a webhook to your own back-office and forward the push notifications to APNs yourself.
+
+The first way is the easy way, but requires you to share your private key with us. The second way allows you to setup push notifications without sharing the credentials with us, but you need to integrate to APNs APIs yourself. We've made this as easy as possible though.
+
+### Setting up direct integration with APNs
+
+To setup the APNs integration you need to:
+
+- A private key (.p8) with access to Apple Push Notifications service (APNs). You can create one in the [Apple developer portal](https://developer.apple.com) under **Keys**.
+- Your private key's Key ID. You can see this in the **Keys** page in Apple developer portal.
+- Your game's App Bundle ID (10 characters), eg. `com.yourcompany.game`.
+- Your Team ID (10 characters). You can see this in the Apple developer portal.
+- Whether to use production or sandbox environment. For development environment / local testing iOS uses the sandbox environment. For apps distributed via TestFlight or AppStore, production environment is used.
+
+Upload the private key and fill in the other fields in the push notifications page in Theymes application and save the changes.
+
+<Info>
+Theymes does not support the certificate-based (.p12) connection to APNs. In case you must use p12 certificates, you can setup the integration yourself and use webhooks in Theymes to deliver the push notifications via your back-office.
+</Info>
+
+### Setting up integration with webhook
+
+When using a webhook, Theymes still normally collects the device tokens. When we need to send a push notification to a device, we will send a POST request to the URL you define. The request is made with `Content-Type: application/json` and the body is of the following format:
+
+```text
+{
+      "authority": String,
+      "method": "POST",
+      "path": String,
+      ”headers": Record<String, String>,
+      "body": String,
+}
+```
+
+Your webhook needs to forward the request to the [APNs HTTP/2 API](https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns). All the necessary headers and body is pre-configured for you, you just forward it to APNs. It is outside the scope of this documentation how to create the webhook and how to sign the requests to APNs, please refer to Apple's documentation for that.
+
+To setup the webhook in Theymes you need two things:
+
+1. Credentials that Theymes will use to send a request to the webhook URL.
+2. The webhook URL.
+
+You can create credentials by navigating to **Company** > **Credentials** and clicking **Create credential**. When setting up the webhook select the credential that your webhook expects and fill in the URL of the webhook and click **Save**. Theymes will now send a POST request to your webhook when we need to send a push notification via APNs.

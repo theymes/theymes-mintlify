@@ -1,0 +1,62 @@
+---
+title: "Player Metadata"
+description: "Theymes allows you to send metadata about the players to provide better support. With player metadata you can:"
+---
+
+Theymes allows you to send metadata about the players to provide better support. With player metadata you can:
+
+- Identify your players.
+- Provide different levels of support to your players.
+- Surface relevant articles based on the custom fields you send. For example if the player has made a purchase recently, you can show an article about how to handle a missing purchase automatically.
+- Provide more context to your support agents so they can help the player faster and better.
+- Pre-fill collector form fields with the player's information.
+- Get more information about the player in our API automations.
+
+## Metadata structure
+
+The metadata is structured as a JSON object that looks like the following:
+
+```json Player Metadata
+{
+  "player": {
+    "id": "a1b2c3d4e5",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "tier": 1
+  },
+  "fields": {
+    "level": "30",
+    "hasMadePurchaseRecently": true
+  },
+  "tags": ["tag1", "tag2", "tag3"]
+}
+```
+
+| Property       | Type       | Required | Description                                                                                 |
+| -------------- | ---------- | -------- | ------------------------------------------------------------------------------------------- |
+| `player.id`    | `string`   | No       | The player id. If omitted, the player is considered anonymous.                              |
+| `player.name`  | `string`   | No       | The player name.                                                                            |
+| `player.email` | `string`   | No       | The player email.                                                                           |
+| `player.tier`  | `number`   | No       | The player tier. Valid values are `1`, `2` and `3`. Defaults to `1` for identified players. |
+| `fields`       | `object`   | No       | Custom fields, must be configured in game settings.                                         |
+| `tags`         | `string[]` | No       | Tags, must be configured in game settings.                                                  |
+
+The whole `player` object is optional. If you don't include the `player` object, the player is considered as anonymous.
+
+Before you can send field and tags to Theymes, you need to define them in your game settings. Any fields and tags that are not defined for the game will be ignored.
+
+## Identified players
+
+Players are considered as identified if they have an `id` field set. In case the player does not have an `id` field set, they are considered as anonymous players.
+
+## Player tiers
+
+The player tier can be `1`, `2` or `3`. The player tier controls the level of support the player gets. You can configure in your game settings what level of support each tier has. For example you can configure that anonymous players can't contact support at all and can only use self-help, tier 1 players can contact support by filling out a form, while tier 2 and 3 players can start a chat with your support team directly.
+
+All identified players have a tier. If you don't specify the tier yourself, Theymes will automatically set the tier to `1`.
+
+## Signed metadata
+
+Theymes allows you to sign your player metadata to ensure that the metadata has not been tampered with. This provides strong guarantee that your players are who they say they are. You can sign any metadata including the player object, fields and tags.
+
+Read more about signing metadata in the [Player Verification](/developers/player-metadata/player-verification) guide.

@@ -1,0 +1,50 @@
+---
+title: "Privacy and young players"
+description: "Theymes SDK doesn't collect any personal data from the player by default. However your app can send data that is considered personal (e.g. custom metadata or collector data) to..."
+---
+
+Theymes SDK doesn't collect any personal data from the player by default. However your app can send data that is considered personal (e.g. custom metadata or collector data) to Theymes.
+
+To comply with regulations such as COPPA, you can control how personal data is handled by the SDK and Theymes.
+
+## Privacy mode
+
+When privacy mode is enabled, Theymes will not store any personal data about the player (including metadata and collector data).
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.setPrivacyMode(true)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes setPrivacyMode:YES];
+```
+
+  
+</Tab>
+</Tabs>
+
+## Young players
+
+You can tell the SDK that the player is a young player. This automatically enables privacy mode and lets support agents know they are talking to a young player.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.setYoungPlayer(true)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes setYoungPlayer:YES];
+```
+
+  
+</Tab>
+</Tabs>

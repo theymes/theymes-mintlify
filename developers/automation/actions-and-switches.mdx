@@ -1,0 +1,136 @@
+---
+title: "Actions and Switches"
+description: "Actions are the steps an automation runs after its trigger. Each action can use static values or Liquid variables from the trigger and previous actions."
+---
+
+Actions are the steps an automation runs after its trigger. Each action can use static values or Liquid variables from the trigger and previous actions.
+
+## Core actions
+
+| Action             | What it does                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| HTTP request       | Calls an external API with a configurable method, URL, headers, credentials, body, and outputs. |
+| Send Slack message | Sends a message to a Slack channel.                                                             |
+| Set variables      | Creates named variables from Liquid templates for later actions.                                |
+| Generate with AI   | Sends a Liquid system prompt to AI and stores the model output as a variable.                   |
+| Switch             | Routes the automation through the first branch whose condition matches.                         |
+
+## Ticket actions
+
+Ticket actions are available in manual ticket workflows and other automation types that can access tickets.
+
+| Action                        | What it does                                                           |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| Set ticket tags and fields    | Adds tags and custom fields to a ticket.                               |
+| Remove ticket tags and fields | Removes tags and custom fields from a ticket.                          |
+| Send message                  | Sends a message to the player.                                         |
+| Add private note              | Adds an internal note to the ticket.                                   |
+| Put ticket on hold            | Puts the ticket on hold.                                               |
+| Remove ticket from on hold    | Removes the ticket from on hold.                                       |
+| Assign ticket                 | Assigns the ticket to a user or unassigns it for automatic assignment. |
+| Close ticket                  | Closes the ticket with a resolution.                                   |
+
+### Ticket message status
+
+The **Status after sending** setting provides three modes:
+
+- **Automatic** uses the normal ticket status transition. If the automation sends the first agent-side message, it becomes the ticket's entry message and does not normally change the status.
+- **Force waiting** removes any existing hold, moves the ticket to Waiting, and starts its waiting timer when the message is sent. This is useful when an automated entry message asks the player to respond.
+- **Keep current** sends the message without changing the ticket's current status or waiting timer.
+
+### Status after removing hold
+
+The **Status after removing hold** setting provides three modes:
+
+- **Automatic** restores the status based on the ticket's latest messages and assignment history.
+- **Force waiting** moves the ticket to Waiting.
+- **Force assigned** moves an assigned ticket to Assigned. If the ticket has no assignee, it moves to Unassigned instead.
+
+## HTTP requests
+
+Use an HTTP request action to send data to an external service or retrieve data for later actions.
+
+The HTTP request action supports:
+
+- Methods: `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
+- Liquid variables in the URL, headers, and body template.
+- JSON or raw request bodies for methods that support bodies.
+- Bearer token or basic auth credentials.
+- Outputs extracted from the response.
+
+### HTTP outputs
+
+HTTP outputs turn response data into variables that later actions can use.
+
+Each output has:
+
+| Field | Description                                                         |
+| ----- | ------------------------------------------------------------------- |
+| Name  | The variable name to create.                                        |
+| Type  | The expected value type: string, number, boolean, object, or array. |
+| Value | How to find the value in the response.                              |
+
+For response paths, use dot notation. For example, `data.name` reads the `name` property from the `data` object in the response.
+
+You can also let AI fill an output value by describing what should be extracted from the response. AI-filled outputs on an HTTP Request step use 1 automation credit in total, regardless of how many AI outputs are configured. Path-based outputs do not use credits.
+
+## Set variables
+
+Use Set variables to create one or more named values from Liquid templates. Later actions can read those values from this node.
+
+Each variable has:
+
+| Field | Description                                                         |
+| ----- | ------------------------------------------------------------------- |
+| Name  | The variable name to create.                                        |
+| Type  | The expected value type: string, number, boolean, object, or array. |
+| Value | A Liquid template that is rendered when the action runs.            |
+
+String values are stored as the rendered text. Number and boolean values are parsed from the rendered text. Object and array values must render as valid JSON.
+
+For example, a string variable named `greeting` on a node named `setVariables` can be used later as:
+
+```liquid
+{{ setVariables.greeting }}
+```
+
+For object and array variables, write JSON in the template. Use the `json` filter when inserting object or array values from earlier actions:
+
+```liquid
+{
+  "playerId": "{{ trigger.playerId }}",
+  "metadata": {{ lookupPlayer.data | json }}
+}
+```
+
+## Generate with AI
+
+Generate with AI renders a Liquid **System prompt** against the automation context, sends it to the model, and stores the model output as a variable. Each run uses 1 automation credit, the same credit as an HTTP Request step that uses AI-filled outputs. The model is not configurable yet.
+
+For example, a node named `aiGenerate` stores the model output as `result`:
+
+```liquid
+{{ aiGenerate.result }}
+```
+
+## Switches
+
+A Switch routes an automation into branches.
+
+Each branch has:
+
+- A label.
+- An optional description.
+- A Liquid condition.
+- A connected next action.
+
+Branches are checked in priority order. The first branch whose condition matches is followed. If no branch matches, the fallback branch is followed when one is configured.
+
+Switches also create variables for later actions, such as the selected branch label and whether the fallback branch was used.
+
+## Best practices
+
+- Keep each action focused on one task.
+- Use clear node names, because node names are used in Liquid variable paths.
+- Add filters or switch branches before actions that change tickets.
+- Use run history to verify outputs from HTTP requests, set variables, and summaries before depending on them in later actions.

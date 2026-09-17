@@ -1,0 +1,32 @@
+---
+title: "Web Widget"
+description: "If you install the widget with <script> tag, the SDK is in window.theymes namespace, e.g. theymes.initialize."
+---
+
+<Info>
+If you install the widget with `<script>` tag, the SDK is in `window.theymes` namespace, e.g. `theymes.initialize`.
+</Info>
+
+Theymes web widget is easy to take into use, after you have [installed the SDK](/developers/sdk/web/installing), you need to initialize it. You can either display the widget as a floating button or imperatively open the widget when you want to show it.
+
+After the widget script has been loaded, you can initialize the widget with the following code:
+
+```javascript
+import { initialize } from '@theymes/sdk';
+
+...
+
+initialize(token, domain, options);
+```
+
+You can find the token and the domain in the game settings page in the [Theymes support application](https://app.theymes.com).
+
+When you want to use the SDK as a widget, you must pass `options.mode = 'widget'` when initializing the SDK. If you pass `options.button = true` to `theymes.initialize()`, a floating button will be automatically displayed which can be used to open the widget. Otherwise you can call `theymes.openSupport()` to manually open the widget without the floating button.
+
+Please refer to [the API documentation](/developers/sdk/web/api#initialize) for all the details what you can configure with the options.
+
+## Player metadata and authentication
+
+If you want to pass player metadata to the widget or authenticate players, you can find more information on the [Using the SDK](/developers/sdk/web/using) page.
+
+Authentication is optional in our web widget. You can embed the widget in pages where the users are anonymous.

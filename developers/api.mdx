@@ -1,0 +1,26 @@
+---
+title: "Theymes API"
+description: "The Theymes API allows you to interact with Theymes platform programmatically. You can use it to access and manage resources."
+---
+
+The Theymes API allows you to interact with Theymes platform programmatically. You can use it to access and manage resources.
+
+## Authentication
+
+Most endpoints require authentication using an API key. You can generate an API key from the Theymes support app.
+
+API keys must be included in the `Authorization` header of each request.
+
+```http
+Authorization: Bearer <YOUR_API_KEY>
+```
+
+### Public endpoints (no authentication)
+
+A small number of endpoints are public and do **not** require an API key. These are the support link endpoints, which create a web support session and return (or redirect to) a public support URL. Instead of an API key, they identify the game using its game environment `token`.
+
+In the [reference documentation](/api-reference) these endpoints are listed under the **Public (no authentication)** group, separate from the authenticated endpoints under **Authenticated (API key)**.
+
+## Reference documentation
+
+You can find the full reference documentation for the [Theymes API here](/api-reference).

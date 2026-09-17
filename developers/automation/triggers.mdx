@@ -1,0 +1,86 @@
+---
+title: "Triggers"
+description: "A trigger decides when an automation starts. Trigger automations run automatically. Workflows use a manual workflow trigger that agents can run from a ticket."
+---
+
+A trigger decides when an automation starts. Trigger automations run automatically. Workflows use a manual workflow trigger that agents can run from a ticket.
+
+Most triggers also support filters. Filters narrow down which tickets, collectors, articles, or resources should start the automation.
+
+When several trigger automations of the same trigger type match the same event, Theymes evaluates and runs them in the order shown in the Triggers list. Drag automations in the list to change that order.
+
+## Ticket triggers
+
+| Trigger        | Starts when                                               | Common use cases                                                                                            |
+| -------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Ticket created | A ticket is created                                       | Route new tickets, notify teams, enrich tickets with metadata.                                              |
+| Player message | A player sends a message                                  | Respond to new player messages, detect first messages, call external systems.                               |
+| Ticket events  | Selected ticket events happen                             | React to assignment, agent messages, private notes, CSAT, collector results, reopens, or ticket end events. |
+| Ticket closed  | A ticket is closed                                        | Send close notifications, sync resolution data, update external tools.                                      |
+| Ticket waiting | A ticket has been waiting longer than the configured time | Escalate delayed tickets, send reminders, put tickets into a follow-up queue.                               |
+
+<Warning>
+Use the Ticket waiting trigger carefully. After it runs for a conversation, Theymes will not run the same trigger again for that same waiting period. If new activity resets the conversation's waiting timer, the conversation can become eligible again.
+
+The waiting time can apply in both directions: a ticket may be waiting since the last player message or since the last agent message. Use other filters to narrow the trigger to the exact type of waiting ticket you want to handle.
+
+Ticket waiting automations are scheduled by a background job. Their order in the Triggers list is used when the job checks for eligible tickets, but the actual runs are queued as separate events, so execution order is not guaranteed. Avoid relying on one Ticket waiting automation to update a ticket before another Ticket waiting automation evaluates or runs.
+</Warning>
+
+### Ticket created run mode
+
+The Ticket created trigger can run for all tickets or only untouched tickets.
+
+An untouched ticket has no agent messages after the first player message. Use this option to avoid multiple automations competing with agents or with each other on the same new ticket.
+
+Ticket created automations use the latest ticket state when they run. If Issue automations or earlier Ticket created automations update the ticket after it is created, later Ticket created automations see the updated ticket state in their filters and variables.
+
+### Ticket events
+
+The Ticket events trigger can listen for all event types or only selected event types:
+
+- Assignment
+- Player message
+- Agent message
+- Private note
+- Ticket ended
+- CSAT
+- Collector result
+- Reopen
+
+Use event type selection when the automation should react only to specific ticket activity.
+
+## Issue triggers
+
+| Trigger        | Starts when             | Common use cases                                                   |
+| -------------- | ----------------------- | ------------------------------------------------------------------ |
+| Issue raised   | Theymes raises an issue | Alert a team when a similar-ticket spike or backlog issue appears. |
+| Issue resolved | An issue is resolved    | Notify a team that a monitored issue has cleared.                  |
+
+Issue raised runs once for each alert occurrence. The same issue can be raised again after an earlier alert is resolved, and each occurrence has its own `alertId`.
+
+## Resource triggers
+
+| Trigger                        | Starts when                                        | Common use cases                                                              |
+| ------------------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Resource modified              | A Theymes resource is modified                     | Sync article or collector changes to external systems.                        |
+| Article localization published | A knowledge base article localization is published | Notify localization, release, or support teams.                               |
+| Collector submitted            | A player submits a collector                       | Send submissions to external tools, notify teams, enrich follow-up processes. |
+
+## Manual workflow trigger
+
+Manual workflows use the Manual workflow trigger. A workflow appears on a ticket only when its filters match the ticket and the agent has access to the workflow's App/Game scope.
+
+Manual workflows can also ask the agent for inputs before running. See [Workflows](/developers/automation/workflows).
+
+## Trigger filters
+
+Filters let you limit when an automation runs. For example, you can run an automation only for tickets with certain tags, languages, platforms, statuses, assignees, player tiers, custom fields, or metadata.
+
+Use filters to keep automations specific. A broad trigger without filters may run more often than expected.
+
+## Trigger variables
+
+Triggers expose variables that later actions can use. For example, a ticket trigger exposes values such as the ticket ID, player ID, language, tags, custom fields, metadata, ticket URL, and event history.
+
+See [Liquid variables](/developers/automation/liquid-variables) for examples.

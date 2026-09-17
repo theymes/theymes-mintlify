@@ -1,33 +1,43 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
-
 # Documentation project instructions
+
+This is the Theymes documentation site on [Mintlify](https://mintlify.com). Pages are MDX with YAML frontmatter. Site config lives in `docs.json`.
+
+Published at docs.theymes.com. The legacy developer site at developers.theymes.com is still Docusaurus in the main Theymes repo (`services/dev-docs`) until cutover.
 
 ## About this project
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+Theymes is customer support software for gaming companies. This site will hold **all** public docs:
+
+- `product/` — product/help docs for support teams using the agent desktop
+- `developers/` — integration docs (SDK, player metadata, automation, API overview)
+- API reference tab — OpenAPI from `https://api.theymes.com/openapi`
+
+## Structure
+
+- Product pages go in `product/`. Do not nest them under `developers/`.
+- Developer pages go in `developers/`. SDK pages live in `developers/sdk/{unity,ios,android,web}/`.
+- Register every new page in `docs.json` navigation. Product content uses the Product tab; integration content uses the Developers tab.
+- The API reference tab is generated from OpenAPI. Auth and overview prose stays in `developers/api.mdx`.
 
 ## Terminology
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- Use **player**, not user, for people playing the game
+- Use **agent** for support staff in the Theymes app
+- Use **help center** for the in-game / widget support UI
+- Use **Theymes SDK** (not “TheymesSdk” except in code)
 
 ## Style preferences
-
-{/* Add any project-specific style rules below */}
 
 - Use active voice and second person ("you")
 - Keep sentences concise — one idea per sentence
 - Use sentence case for headings
 - Bold for UI elements: Click **Settings**
 - Code formatting for file names, commands, paths, and code references
+- Mintlify callouts: `<Tip>`, `<Info>`, `<Warning>` (not Docusaurus `:::tip`)
+- Mintlify tabs: `<Tabs><Tab title="Swift">` (not `@theme/Tabs`)
 
 ## Content boundaries
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Do not document internal admin-only Theymes features
+- Do not publish draft SDK pages (for example retention tracking) unless they are ready
+- Android SDK docs may stay as a stub until the native docs exist

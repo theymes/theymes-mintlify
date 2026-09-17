@@ -1,0 +1,87 @@
+---
+title: "Using the SDK"
+description: "If you install the SDK with <script> tag, the SDK is in window.theymes namespace, e.g. theymes.initialize."
+---
+
+<Info>
+If you install the SDK with `<script>` tag, the SDK is in `window.theymes` namespace, e.g. `theymes.initialize`.
+</Info>
+
+After you have installed the SDK, you need to initialize it. You need to initialize the SDK with a token and domain which you can find in the game settings page in the [Theymes support application](https://app.theymes.com).
+
+You can also pass an optional options argument, please refer to [the API documentation](/developers/sdk/web/api#initialize) for all the details what you can configure with the options.
+
+```typescript
+import { initialize } from '@theymes/sdk';
+
+...
+
+initialize(token: string, domain: string, options: InitializeOptions);
+```
+
+## Opening the SDK
+
+Once the SDK has been initialized, you can open it. You can open the SDK in [a few different ways](/developers/sdk/web/api#opening-and-closing) but let's focus on opening the help center here. Call `openSupport` to open the help center:
+
+```javascript
+import { openSupport } from '@theymes/sdk';
+
+...
+
+openSupport()
+```
+
+And that's all you need for the SDK to work with a basic setup!
+
+## Using the SDK with React
+
+To integrate the SDK with a React application, you should call initialize inside a component that remains mounted throughout the app's lifecycle, usually near the top of your component tree. The most common approach is to invoke it within a useEffect hook when the component mounts.
+
+### Basic example:
+
+```jsx
+import { initialize } from '@theymes/sdk';
+import { useEffect } from 'react';
+
+// App component is always mounted
+export const App = () => {
+  useEffect(() => {
+    const token = '...';
+    const domain = '...';
+
+    initialize(token, domain);
+  }, []);
+
+  return (
+    // Your app's components
+  );
+};
+```
+
+To open the help center, call the openSupport function where you want to open it:
+
+```jsx
+import { openSupport } from '@theymes/sdk';
+
+const OpenSupportButton = () => {
+  return <button onClick={() => openSupport()}>Open Support</button>;
+};
+```
+
+## Configuring the SDK
+
+You can also configure the language, player information and metadata of the SDK. Please refer to the [Configuring the SDK](/developers/sdk/web/configuring) page for more details.
+
+You can also do more with the SDK such as track retention, enable in-game notifications, or subscribe to changes (e.g. unread messages) within Theymes. Please refer to the [API Reference](/developers/sdk/web/api) for a comprehensive list of methods the SDK supports.
+
+### Player metadata
+
+If you use the SDK to serve non-anonymous players, you can send metadata to the SDK to include information about the player such as the player id, tier or custom fields/tags. Please read the [Player metadata documentation](/developers/player-metadata/player-metadata) to learn more about the metadata and what you can include in it.
+
+<Tip>
+By setting up metadata, you will have better control over configuring which players can contact support and when. For example, you can prevent anonymous players from contacting support and force unverified players to go through self-help first while still allowing verified players or only your VIP players to contact support directly.
+</Tip>
+
+### Authentication
+
+Theymes doesn’t have its own user authentication which would require users to create accounts on our platform. Instead, we let you integrate our support to your existing authentication by using our [Player Verification](/developers/player-metadata/player-verification) feature.

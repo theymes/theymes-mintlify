@@ -1,0 +1,195 @@
+---
+title: "Configuring the SDK"
+description: "There are many options to customize the SDK to your needs. You can either pass a config dictionary to methods like openSupport(config:), or set configuration via the Theymes cla..."
+---
+
+There are many options to customize the SDK to your needs. You can either pass a config dictionary to methods like `openSupport(config:)`, or set configuration via the `Theymes` class (e.g. `setLanguage(_:)`, `setPlayer(_:)`), in which case the options are persisted and passed to the help center when opened later.
+
+You can even use both methods together. When Theymes opens the help center it will merge the configuration options from both.
+
+<Tip>
+**Prefer persisting configuration options**
+
+Persisting the options such as fields and tags is preferred, as it ensures that the help center will always open with the correct configuration and allows other SDK features to use them.
+</Tip>
+
+## Language
+
+[ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language code in which the help center should be displayed. If not set, we will prefer the language of the device the game is running on, and if that is not available, we will default to English. **Note, some languages do not support two-letter ISO-639-1 code**, so for those languages you need to give the three-letter [ISO-639-2 code](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes).
+
+You can specify any languages that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// persist the language using Theymes.setLanguage(_:)
+Theymes.setLanguage("fr")
+
+// open the help center with the language, but don't persist it
+Theymes.openSupport(config: ["language": "fr"])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// persist the language using setLanguage:
+[Theymes setLanguage:@"fr"];
+
+// open the help center with the language, but don't persist it
+[Theymes openSupportWithConfig:@{ @"language": @"fr" }];
+```
+
+  
+</Tab>
+</Tabs>
+
+## Player
+
+There are two ways to set the player information. You can either set it using the `setPlayer(_:)` method, or by using our [Player Verification](/developers/player-metadata/player-verification) feature. With the Player Verification feature you get a signed token from your backend which you can pass to the SDK with `setSignedMetadataToken(_:)`.
+
+<Info>
+**Player Verification**
+
+The Player Verification allows you to verify the identity of your players. For example if someone opens a support ticket, you can be sure that the player information and optionally other metadata is correct and not tampered with.
+</Info>
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// persist the player information using Theymes.setPlayer(_:)
+Theymes.setPlayer([
+  "id": "358912389",
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "tier": 2
+] as [String: Any])
+
+// persist the signed player token using Theymes.setSignedMetadataToken(_:)
+Theymes.setSignedMetadataToken(tokenFromBackend)
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// persist the player information using setPlayer:
+[Theymes setPlayer:@{
+  @"id": @"358912389",
+  @"name": @"John Doe",
+  @"email": @"john.doe@example.com",
+  @"tier": @2
+}];
+
+// persist the signed player token using setSignedMetadataToken:
+[Theymes setSignedMetadataToken:tokenFromBackend];
+```
+
+  
+</Tab>
+</Tabs>
+
+If you use Player Verification with expiring tokens, implement `didUpdateSignedMetadataTokenExpiration(_:)`. It is called once a minute with the remaining expiration time in seconds, and may be `0` or negative if the current token is already expired. Your game decides when to refresh the token based on this value. The value is calculated from the client's clock, so if the clock is not in sync, the reported expiration time is skewed too.
+
+All player fields are optional, however it is highly recommended to set at least the `id` field, otherwise the player will be considered as an anonymous player. See our [Player Metadata](/developers/player-metadata/player-metadata#metadata-structure) documentation for more information about the player fields.
+
+## Tags
+
+Tags are used to categorize the support tickets. You can specify any tags that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Tags that are not configured for your game will be ignored.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// add and persist a new tag
+Theymes.addTag("banned_player")
+// add and persist multiple tags
+Theymes.addTags(["banned_player", "cheater_report"])
+
+// open the help center with the tags, but don't persist them
+Theymes.openSupport(config: ["tags": ["banned_player", "cheater_report"]])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// add and persist a new tag
+[Theymes addTag:@"banned_player"];
+// add and persist multiple tags
+[Theymes addTags:@[@"banned_player", @"cheater_report"]];
+
+// open the help center with the tags, but don't persist them
+[Theymes openSupportWithConfig:@{ @"tags": @[@"banned_player", @"cheater_report"] }];
+```
+
+  
+</Tab>
+</Tabs>
+
+There are more functions to manage tags. See the [API Reference](/developers/sdk/ios/api) for more information.
+
+## Fields
+
+Fields are used to pass additional information about the player to the help center. You can specify any fields that are configured for your game in the Theymes application. Please check your game settings in the Theymes application to see available values. Fields that are not configured for your game will be ignored.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+// add and persist a new field
+Theymes.addField("level", value: 15)
+// add and persist multiple fields
+Theymes.addFields(["level": 15, "has_made_purchase": true])
+
+// open the help center with the fields, but don't persist them
+Theymes.openSupport(config: ["fields": ["level": 15, "has_made_purchase": true]])
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+// add and persist a new field
+[Theymes addField:@"level" value:@15];
+// add and persist multiple fields
+[Theymes addFields:@{ @"level": @15, @"has_made_purchase": @YES }];
+
+// open the help center with the fields, but don't persist them
+[Theymes openSupportWithConfig:@{ @"fields": @{ @"level": @15, @"has_made_purchase": @YES } }];
+```
+
+  
+</Tab>
+</Tabs>
+
+There are more functions to manage fields. See the [API Reference](/developers/sdk/ios/api) for more information.
+
+## Breadcrumbs
+
+Breadcrumbs are short diagnostic messages you can add before opening support. They are useful for describing recent game events, such as the player opening a menu, starting a mission, or hitting an error.
+
+<Tabs>
+  <Tab title="Swift">
+```swift
+Theymes.addBreadcrumb("Player opened inventory")
+Theymes.addBreadcrumbs(["Crafting started", "Crafting failed: missing_wood"])
+Theymes.openSupport()
+Theymes.clearBreadcrumbs()
+```
+
+  
+</Tab>
+  <Tab title="Objective-C">
+```objectivec
+[Theymes addBreadcrumb:@"Player opened inventory"];
+[Theymes addBreadcrumbs:@[@"Crafting started", @"Crafting failed: missing_wood"]];
+[Theymes openSupport];
+[Theymes clearBreadcrumbs];
+```
+
+  
+</Tab>
+</Tabs>
+
+The SDK timestamps breadcrumbs automatically and includes them when you call `openSupport` or `openResource`. Breadcrumbs are kept in memory only, bounded by SDK settings, and cleared when you call `clearBreadcrumbs()` or `reset()`.
+
+Do not include personal data, secrets, or other sensitive information in breadcrumbs.

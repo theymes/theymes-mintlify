@@ -1,0 +1,20 @@
+---
+title: "Privacy and young players"
+description: "Theymes SDK doesn't collect any personal data from the player by default. However it is possible for the game to send data that is considered personal data to Theymes as form of..."
+---
+
+Theymes SDK doesn't collect any personal data from the player by default. However it is possible for the game to send data that is considered personal data to Theymes as form of custom metadata or collector data.
+
+In order to comply with regulations such as COPPA, it is possible to control how the personal data is handled by the SDK and Theymes.
+
+## Privacy mode
+
+When privacy mode is enabled, Theymes will not store any personal data about the player. This includes metadata and collector data.
+
+To enable privacy mode, you can call [`TheymesSdk.SetPrivacyMode(true)`](/developers/sdk/unity/api#setprivacymode).
+
+## Young players
+
+You can also tell the SDK that the player is a young player. This will automatically enable privacy mode and also make the support agents aware that they are talking to a young player.
+
+To set the player as a young player, you can call [`TheymesSdk.SetYoungPlayer(true)`](/developers/sdk/unity/api#setyoungplayer).

@@ -1,0 +1,141 @@
+---
+title: "Player Verification Guide"
+description: "This guide will walk you through the process of setting up player verification for your game. We assume that you don't yet have an existing private key to sign your metadata JWT..."
+---
+
+This guide will walk you through the process of setting up player verification for your game. We assume that you don't yet have an existing private key to sign your metadata JWTs with. We'll walk you through the process of generating a private/public key pair, and configuring JWKS in your game settings so Theymes can verify your signed player metadata.
+
+## Step 1: Create a private key
+
+This requires you to have `openssl` installed on your machine. If you don't have `openssl` installed, you can use online tools like [this one](https://cryptotools.net/rsagen) to generate a private key and public key instead. The private key needs to have a key length of at least 2048 bits.
+
+Run the following command to generate a private key:
+
+```shell-session Generate a private key
+$ openssl genrsa -out player-verification-private-key.pem 2048
+```
+
+## Step 2: Create a public key
+
+In the same directory as where you created the private key, run the following command to get a public key:
+
+```shell-session Generate a public key
+$ openssl rsa -in player-verification-private-key.pem -pubout -out player-verification-public-key.pem
+```
+
+## Step 3: Create a JWK from the public key
+
+The easiest way to create a JWKS from the public key is to use an online tool such as [PEM to JWK Converter](https://pem2jwk.vercel.app/).
+
+You can print the PEM encoded public key with this command:
+
+```shell-session Print the PEM encoded public key
+$ cat player-verification-public-key.pem
+```
+
+Fill out the following fields:
+
+- **Signing Algorithm**: `RS256`
+- **Public Key Use**: Signing
+- **Key ID**: You can leave empty to auto-generate.
+- **PEM Encoded Key**: Paste the PEM encoded public key here, including the `-----BEGIN PUBLIC KEY-----` and `-----END PUBLIC KEY-----` lines.
+
+Click **Convert to JWK** to get a JSON Web Key from the public key.
+
+## Step 4: Create a JWKS from the JWK
+
+Copy the JWK from previous step, and wrap it in a JSON object with `keys` array.
+
+```json
+{
+  "keys": [
+    // paste the JWK here
+  ]
+}
+```
+
+You should end up with something like this:
+
+```json Example JWKS
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "n": "mYhZNtoz7shxGTEYanL9aMk4klv4z4u1SKCD55P7RDmGCzUoX3DA8PRHT4vmlD-VSYM-W7NmHcwvRVU73v3wcNqcdGRhrFiTNMznXPUAzLq1Djf_yF8PPKWZjRs19pc-5OQPzl81qE4xCZ2RrJ2o_2ojFPceuBF-eNSHLIbGRonVDawROQyNds5pmKPJf9ISpbEXYL5eh3JWAUZft_WILIlAfbocFg9aMpzBOHZixD8wD2nMI--OYP980dqGtCwVYqM_LIWjehexuCDvKIgrwiVzx9OMFoSDDg_ewiRn3I9QPZ5k1Ej1pqYd1Z1BY6Ztoz4eRabNeHC74_NjGwDZ1Q",
+      "e": "AQAB",
+      "ext": true,
+      "kid": "bdb1af4e924b37e468383",
+      "alg": "RS256",
+      "use": "sig"
+    }
+  ]
+}
+```
+
+## Step 5: Set up JWKS in your game settings
+
+1. Navigate to your game settings in Theymes Support Application.
+2. Open the **Player verification** tab.
+3. Enable player verification.
+4. Choose `Enter JWKS manually` from the "How to verify players" dropdown.
+5. Paste the JWKS from previous step to the JWKS textarea.
+6. Choose do you want to allow or block unverified players. If all of your players are verified, we recommend that you block unverified players.
+7. Click **Save changes** to save your changes.
+
+The settings should now look something like this:
+
+![Example JWKS](/developers/player-metadata/jwks-example.png)
+
+## Step 6: Ready to go!
+
+Your game is now setup to receive and verify signed player metadata. Remember that when you sign your player metadata, you need to include the key ID in the `kid` field of the JWT header. Most libraries will allow you to pass the key ID as an option when signing the JWT.
+
+Here is an example of how to sign a player metadata token.
+
+<Tabs>
+  <Tab title="Javascript">
+  ```js
+    import fs from "fs";
+    import * as jose from "jose";
+
+    const alg = "RS256";
+    const kid = "bdb1af4e924b37e468383"; // needs to match the kid in JWKS
+    const pkcs8 = fs.readFileSync("player-verification-private-key.pem", "utf8");
+    const privateKey = await jose.importPKCS8(pkcs8, alg);
+
+    const metadata = {
+      player: {
+        id: "123",
+        name: "John Doe",
+        email: "john.doe@example.com",
+        tier: 2,
+      },
+      tags: ["tag1", "tag2", "tag3"],
+      fields: {
+        level: 30,
+      },
+    };
+
+    const jwt = await new jose.SignJWT({ metadata })
+      .setProtectedHeader({ alg, kid })
+      .setIssuedAt()
+      .setIssuer("https://example.com")
+      .setAudience("https://example.theymes.com")
+      .setExpirationTime("2h")
+      .sign(privateKey);
+
+    console.log(jwt);
+
+    ```
+</Tab>
+</Tabs>
+
+This will print you a signed player metadata token. You can make sure that the token is valid and works in the Theymes settings, by pasting the token to the **Test if it works** field:
+
+![Verify player metadata token](/developers/player-metadata/jwt-verify.png)
+
+If you got a successful validation result, you're now ready to send your signed player metadata from your game or web site to Theymes!
+
+<Tip>
+Remember that if you change the private key you sign your player metadata with, you need to update the JWKS in your game settings. You can serve your JWKS via a JWKS endpoint instead, in which case you don't need to update the JWKS in your game settings manually, you just need to make sure your JWKS endpoint is available and has the latest public keys listed.
+</Tip>

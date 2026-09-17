@@ -1,0 +1,62 @@
+---
+title: "Runs and Errors"
+description: "Every time an automation starts, Theymes creates a run. Runs help you understand what happened, which actions executed, what values were produced, and why an automation failed."
+---
+
+Every time an automation starts, Theymes creates a run. Runs help you understand what happened, which actions executed, what values were produced, and why an automation failed.
+
+## Run statuses
+
+| Status | Meaning |
+| ------ | ------- |
+| Running | The automation is still executing. |
+| Completed | The automation finished without recorded errors. |
+| Failed | One or more actions failed. |
+
+## Run list
+
+The run list shows recent runs for an automation, including:
+
+- Run status.
+- Trigger name.
+- Created and updated times.
+- Whether the run had errors.
+
+Use the errors-only filter when you want to investigate failures.
+
+## Run details
+
+The run detail page shows:
+
+- The run ID.
+- The automation that created the run.
+- The run status and timestamps.
+- Execution errors.
+- The timeline of executed nodes.
+- Output variables created by each node.
+
+Use run details to confirm that filters matched correctly, Liquid templates rendered as expected, HTTP request outputs were extracted correctly, and switch branches selected the intended path.
+
+## Common error causes
+
+| Cause | What to check |
+| ----- | ------------- |
+| Missing or invalid Liquid value | Check the node name and variable path. Make sure the value exists for this trigger. |
+| HTTP request failed | Check the URL, method, credentials, headers, and request body. |
+| HTTP output missing | Check the response path and output type. |
+| Ticket action failed | Check that the ticket is still accessible and that the action is valid for the ticket state. |
+| Workflow input missing | Check whether a required input was left empty. |
+| No switch branch matched | Add or adjust a fallback branch, or update branch conditions. |
+
+## Troubleshooting workflow
+
+1. Open the failed run.
+2. Find the first node with an error.
+3. Check the values produced by previous nodes.
+4. Verify any Liquid template used by the failed node.
+5. Update the automation draft.
+6. Save and publish the automation again.
+
+## Retention
+
+Automation run history is kept for a limited time. If you need long-term reporting, send important automation events to your own system with an HTTP request or Slack message.

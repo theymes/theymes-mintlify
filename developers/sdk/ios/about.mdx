@@ -1,0 +1,18 @@
+---
+title: "About iOS SDK"
+description: "Theymes has a native iOS SDK for Swift and Objective-C. It lets you add in-app help center, open specific resources (e.g. articles or collectors), set player metadata, and use i..."
+---
+
+Theymes has a native iOS SDK for Swift and Objective-C. It lets you add in-app help center, open specific resources (e.g. articles or collectors), set player metadata, and use in-game and push notifications.
+
+See the rest of the iOS SDK documentation in this section for [installation](/developers/sdk/ios/installing), [configuration](/developers/sdk/ios/configuring), and [API reference](/developers/sdk/ios/api).
+
+## iOS requirements
+
+The minimum supported iOS version is 14. The SDK will compile for older versions of iOS, but attempting to open the help center or other resources on unsupported devices will display a view informing the user that their device is not supported.
+
+<Tip>
+**Hiding features from old devices**
+
+While Theymes SDK will gracefully handle older devices, you might want to hide the UI that opens the help center or other resources from the user. You can do this by checking `Theymes.isSupported()` (Swift) or `[Theymes isSupported]` (Objective-C). If it returns `false`, hide the elements that would not work on older devices.
+</Tip>
