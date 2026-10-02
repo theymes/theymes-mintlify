@@ -48,14 +48,14 @@ The **Status after removing hold** setting provides three modes:
 
 ### Ticket assignment status
 
-The Assign ticket action's **Status** setting provides two modes:
+The Assign ticket action's **Match status to assignment** checkbox is unchecked by default.
 
-- **Automatic** (default) keeps Waiting, On hold, and Closed unchanged. Otherwise, status follows the new assignment.
-- **Match assignment** sets Assigned when an assignee exists, or Unassigned when there is no assignee. On hold and Closed remain unchanged.
+- **Unchecked (Automatic)** keeps Waiting, On hold, and Closed unchanged. Otherwise, status follows the new assignment.
+- **Checked** sets Assigned when an assignee exists, or Unassigned when there is no assignee, even if the ticket is Waiting. On hold and Closed remain unchanged.
 
-Use **Unassign + Match assignment** to return a Waiting ticket to Unassigned so it can be considered for automatic routing. An empty dynamic assignee value also unassigns the ticket. These modes do not remove holds, reopen closed tickets, or reset waiting timers.
+Use **Unassign** with **Match status to assignment** checked to return a Waiting ticket to Unassigned so it can be considered for automatic routing. An empty dynamic assignee value also unassigns the ticket. This setting does not remove holds, reopen closed tickets, or reset waiting timers.
 
-Existing nodes without this setting use Automatic. To use Match assignment, select it and publish an updated automation version.
+Existing nodes without this setting use Automatic. To enable the override, check **Match status to assignment** and publish an updated automation version.
 
 ## HTTP requests
 
